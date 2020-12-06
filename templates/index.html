@@ -2,5 +2,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Amsterdam</h1>
+
+<div class="row">
+    <div class="col">    
+        <h3>Infrastructural effect of fires in Amsterdam</h3>
+    </div>
+</div>
+<div class="row">
+    {{ plot_div|indent(4)|safe }}
+</div>
+
 {% endblock %}

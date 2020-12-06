@@ -5,6 +5,7 @@ from jinja2 import Template
 from bokeh.embed import components
 from bokeh.plotting import figure
 from bokeh.resources import INLINE
+from bokeh.tile_providers import get_provider, Vendors
 
 app = Flask(__name__)
 # Configurations
@@ -13,14 +14,13 @@ ALOWED_CORS_DOMAIN = 'http://localhost:8080'
 
 @app.route('/', methods=(['GET']))
 def home():
-    fig = figure(plot_width=600, plot_height=600)
-    fig.vbar(
-        x=[1, 2, 3, 4],
-        width=0.5,
-        bottom=0,
-        top=[1.7, 2.2, 4.6, 3.9],
-        color='navy'
-    )
+    tile_provider = get_provider(Vendors.CARTODBPOSITRON_RETINA)
+
+    fig = figure(x_range=(515919.90, 642740.25), y_range=(6095766.77, 6212052.13),
+           x_axis_type="mercator", y_axis_type="mercator", plot_width=1000, plot_height=600)
+
+
+    fig.add_tile(tile_provider)
 
     # grab the static resources
     js_resources = INLINE.render_js()
@@ -28,14 +28,13 @@ def home():
 
     # # render template
     script, div = components(fig)
-    html = render_template(
+
+    return render_template(
         'index.html',
         plot_script=script,
         plot_div=div,
         js_resources=js_resources,
-        css_resources=css_resources,
-    )
-    return render_template('index.html')
+        css_resources=css_resources)
 
 @app.route('/export', methods=(['GET']))
 def export():
