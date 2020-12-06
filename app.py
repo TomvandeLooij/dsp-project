@@ -1,11 +1,9 @@
 # app.py
 from flask import Flask, render_template, request
-from jinja2 import Template
-
 from bokeh.embed import components
-from bokeh.plotting import figure
 from bokeh.resources import INLINE
-from bokeh.tile_providers import get_provider, Vendors
+
+from .components import base_map
 
 app = Flask(__name__)
 # Configurations
@@ -14,13 +12,8 @@ ALOWED_CORS_DOMAIN = 'http://localhost:8080'
 
 @app.route('/', methods=(['GET']))
 def home():
-    tile_provider = get_provider(Vendors.CARTODBPOSITRON_RETINA)
-
-    fig = figure(x_range=(515919.90, 642740.25), y_range=(6095766.77, 6212052.13),
-           x_axis_type="mercator", y_axis_type="mercator", plot_width=1000, plot_height=600)
-
-
-    fig.add_tile(tile_provider)
+    fig = base_map.create_base_map()
+    fig = base_map.add_public_transport(fig)
 
     # grab the static resources
     js_resources = INLINE.render_js()
@@ -38,7 +31,16 @@ def home():
 
 @app.route('/export', methods=(['GET']))
 def export():
-    return 'Export!'
+    # grab the static resources
+    js_resources = INLINE.render_js()
+    css_resources = INLINE.render_css()
+
+    return render_template(
+        'export.html',
+        js_resources = js_resources,
+        css_resources = css_resources,
+        plot_script = None
+    )
 
 
 def add_cors_headers(response):
