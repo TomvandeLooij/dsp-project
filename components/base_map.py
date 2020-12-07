@@ -32,7 +32,7 @@ def add_public_transport(fig):
     lat, lon = 52.36, 4.9
     coord = TRAN_4326_TO_3857.transform(lat, lon)
 
-    df = pd.read_csv('/home/tom/Documents/dsp-project/data/tram_metro_lijnen.csv')
+    df = pd.read_csv('./data/tram_metro_lijnen.csv')
 
     df['WKT_LAT_LNG'] = df['WKT_LAT_LNG'].apply(convert)
 
