@@ -3,7 +3,7 @@ from flask import Flask, render_template, request
 from bokeh.embed import components
 from bokeh.resources import INLINE
 
-from .components import base_map
+from components import base_map
 
 app = Flask(__name__)
 # Configurations
