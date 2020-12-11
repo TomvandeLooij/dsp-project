@@ -3,18 +3,18 @@ from flask import Flask, render_template, request
 from bokeh.embed import components
 from bokeh.resources import INLINE
 
-from components import base_map
+from .components import base_map
 
 app = Flask(__name__)
 # Configurations
 ALOWED_CORS_DOMAIN = 'http://localhost:8080'
 
-
 @app.route('/', methods=(['GET']))
 def home():
     fig = base_map.create_base_map()
     fig = base_map.add_public_transport(fig)
-
+    fig = base_map.draw_polygon(fig)
+    print("done with loading")
     # grab the static resources
     js_resources = INLINE.render_js()
     css_resources = INLINE.render_css()
