@@ -42,3 +42,17 @@ def add_public_transport(fig):
             fig.circle(coord[0], coord[1], size=3)
 
     return fig
+
+def draw_polygon(fig):
+    # test data for a house/building
+    coordinates = [[53.31960, 6.81197], [53.31961, 6.81205], [53.31968, 6.81202], [53.31967, 6.81194], [53.31960, 6.81197]]
+    print(coordinates)
+    coordinates = [TRAN_4326_TO_3857.transform(coord[0], coord[1]) for coord in coordinates]
+    print(coordinates)
+
+    x_coords = [c[1] for c in coordinates]
+    y_coords = [c[0] for c in coordinates]
+
+    fig.patch(y_coords, x_coords, alpha=0.2, line_width=1, color="navy")
+
+    return fig
