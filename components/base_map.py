@@ -24,25 +24,21 @@ def convert(test):
 
     final = []
     for coord in test3:
-        final.append([float(coord[0]), float(coord[1])])
+        transformed_coord = TRAN_4326_TO_3857.transform(float(coord[0]), float(coord[1]))
+        final.append([transformed_coord[0], transformed_coord[1]])
 
     return final
 
+
 def add_public_transport(fig):
-    lat, lon = 52.36, 4.9
-    coord = TRAN_4326_TO_3857.transform(lat, lon)
-
-    df = pd.read_csv('./data/tram_metro_lijnen.csv')
-
+    df = pd.read_csv('/home/tom/Documents/dsp-project/data/tram_metro_lijnen.csv')
     df['WKT_LAT_LNG'] = df['WKT_LAT_LNG'].apply(convert)
-
-    coords = df.iloc[0]['WKT_LAT_LNG']
 
     for i in range(len(df)):
         coords = df.iloc[i]['WKT_LAT_LNG']
 
-        for coord in coords:
-            transformed_coord = TRAN_4326_TO_3857.transform(coord[0], coord[1])
-            fig.circle(transformed_coord[0], transformed_coord[1], size = 5)
+        for j in range(0, len(coords), 4):
+            coord = coords[j]
+            fig.circle(coord[0], coord[1], size=3)
 
     return fig
