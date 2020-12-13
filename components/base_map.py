@@ -2,6 +2,9 @@ import pandas as pd
 
 from bokeh.plotting import figure
 from bokeh.tile_providers import get_provider, Vendors
+from bokeh.models.callbacks import CustomJS
+from bokeh.models import ColumnDataSource, TapTool, MultiPolygons, Patches
+from bokeh.io import curdoc
 
 from pyproj import Transformer, transform
 
@@ -11,7 +14,8 @@ def create_base_map():
     tile_provider = get_provider(Vendors.CARTODBPOSITRON_RETINA)
 
     fig = figure(x_range=(530683.95, 555576.10), y_range=(6854570.54, 6876203.35),
-                 x_axis_type="mercator", y_axis_type="mercator", plot_width=1000, plot_height=600)
+                 x_axis_type="mercator", y_axis_type="mercator", plot_width=1000, plot_height=600,
+                 tools="tap,pan,wheel_zoom,reset")
 
     fig.add_tile(tile_provider)
 
@@ -43,20 +47,40 @@ def add_public_transport(fig):
 
         for coord in coords:
             transformed_coord = TRAN_4326_TO_3857.transform(coord[0], coord[1])
-            fig.circle(transformed_coord[0], transformed_coord[1], size = 2)
+            fig.circle(transformed_coord[0], transformed_coord[1], size = 4)
 
     return fig
 
 def draw_polygon(fig):
     # test data for a house/building
     coordinates = [[53.31960, 6.81197], [53.31961, 6.81205], [53.31968, 6.81202], [53.31967, 6.81194], [53.31960, 6.81197]]
-    print(coordinates)
+    # print(coordinates)
     coordinates = [TRAN_4326_TO_3857.transform(coord[0], coord[1]) for coord in coordinates]
-    print(coordinates)
+    # print(coordinates)
+    
+    x_coords = [[[[c[1] for c in coordinates]]]]
+    y_coords = [[[[c[0] for c in coordinates]]]]
+    print(x_coords, y_coords)
 
-    x_coords = [c[1] for c in coordinates]
-    y_coords = [c[0] for c in coordinates]
+    data = {'xs': x_coords, 'ys': y_coords}
 
-    fig.patch(y_coords, x_coords, alpha=0.2, line_width=1, color="navy")
+    source = ColumnDataSource(data=data)
+
+    glyph = fig.multi_polygons(xs='ys', ys='xs', color="navy", name="pand", alpha=0.2, source=source)
+    glyph.tags = ['pand']
+
+    # fig patch does not work, can not click on patch
+
+    # works for points and polygons but not only for polygons
+    call = CustomJS(code="console.log('tap event occurred')")
+    tap = fig.select(type=TapTool)
+    tap.callback = call
+
+    curdoc().add_root(fig)
+
+    # format for ColumnDataSource that multi_polygons can handle [[[[dsometehe]]], [[[dkhfaiwue]]]]
 
     return fig
+
+def callback_fcn(attr, old, new):
+    print("{} - {} - {}".format(attr, old, new))

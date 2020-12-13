@@ -2,6 +2,11 @@
 from flask import Flask, render_template, request
 from bokeh.embed import components
 from bokeh.resources import INLINE
+from bokeh.models.callbacks import CustomJS
+from bokeh.models import TapTool, ColumnDataSource
+from bokeh.models.tools import TapTool
+from bokeh.plotting import figure, curdoc
+from bokeh.layouts import column
 
 from .components import base_map
 
@@ -15,6 +20,16 @@ def home():
     fig = base_map.add_public_transport(fig)
     fig = base_map.draw_polygon(fig)
     print("done with loading")
+
+    # try option 2 not working....
+    # glyph = fig.select(name="pand")
+    # tap = TapTool(renderers=glyph)
+    # # tools = (tap)
+    # fig.add_tools(tap)
+
+    # glyph.data_source.on_change('selected', base_map.callback_fcn)
+    # curdoc().add_root(column(fig))
+
     # grab the static resources
     js_resources = INLINE.render_js()
     css_resources = INLINE.render_css()
