@@ -37,16 +37,8 @@ def home():
 
 @app.route('/building/<pand_id>', methods=(['GET']))
 def get_information(pand_id):
-    print(int(pand_id))
+    print(pand_id)
     print("this is working")
-
-    # fig = base_map.create_base_map()
-
-    # script, div = components(fig)
-
-    # # grab the static resources
-    # js_resources = INLINE.render_js()
-    # css_resources = INLINE.render_css()
 
     return render_template(
         'export.html'
