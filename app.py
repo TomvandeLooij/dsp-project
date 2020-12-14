@@ -21,15 +21,6 @@ def home():
     fig = base_map.draw_polygon(fig)
     print("done with loading")
 
-    # try option 2 not working....
-    # glyph = fig.select(name="pand")
-    # tap = TapTool(renderers=glyph)
-    # # tools = (tap)
-    # fig.add_tools(tap)
-
-    # glyph.data_source.on_change('selected', base_map.callback_fcn)
-    # curdoc().add_root(column(fig))
-
     # grab the static resources
     js_resources = INLINE.render_js()
     css_resources = INLINE.render_css()
@@ -43,6 +34,19 @@ def home():
         plot_div=div,
         js_resources=js_resources,
         css_resources=css_resources)
+
+@app.route('/points/<pand_id>', methods=(['GET']))
+def get_information(pand_id):
+    # grab the static resources
+    js_resources = INLINE.render_js()
+    css_resources = INLINE.render_css()
+
+    return render_template(
+        'index.html',
+        js_resources = js_resources,
+        css_resources = css_resources,
+        plot_script = None
+    )
 
 @app.route('/export', methods=(['GET']))
 def export():

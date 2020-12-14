@@ -3,8 +3,9 @@ import pandas as pd
 from bokeh.plotting import figure
 from bokeh.tile_providers import get_provider, Vendors
 from bokeh.models.callbacks import CustomJS
-from bokeh.models import ColumnDataSource, TapTool, MultiPolygons, Patches
+from bokeh.models import ColumnDataSource, TapTool, MultiPolygons, Patches, Select, Column, CustomJS
 from bokeh.io import curdoc
+from bokeh import events
 
 from pyproj import Transformer, transform
 
@@ -33,21 +34,38 @@ def convert(test):
     return final
 
 def add_public_transport(fig):
-    lat, lon = 52.36, 4.9
-    coord = TRAN_4326_TO_3857.transform(lat, lon)
+    # lat, lon = 52.36, 4.9
+    # coord = TRAN_4326_TO_3857.transform(lat, lon)
 
+    # df = pd.read_csv('./data/tram_metro_lijnen.csv')
+
+    # df['WKT_LAT_LNG'] = df['WKT_LAT_LNG'].apply(convert)
+
+    # coords = df.iloc[0]['WKT_LAT_LNG']
+
+    # for i in range(len(df)):
+    #     coords = df.iloc[i]['WKT_LAT_LNG']
+
+    #     for coord in coords:
+    #         transformed_coord = TRAN_4326_TO_3857.transform(coord[0], coord[1])
+    #         fig.circle(transformed_coord[0], transformed_coord[1], size = 4)
+
+    # return fig
     df = pd.read_csv('./data/tram_metro_lijnen.csv')
-
     df['WKT_LAT_LNG'] = df['WKT_LAT_LNG'].apply(convert)
-
-    coords = df.iloc[0]['WKT_LAT_LNG']
 
     for i in range(len(df)):
         coords = df.iloc[i]['WKT_LAT_LNG']
-
-        for coord in coords:
+        # list with x-coordinates
+        lijstx = []
+        # list with y-coordinates
+        lijsty = []
+        for j in range(0, len(coords), 4):
+            coord = coords[j]
             transformed_coord = TRAN_4326_TO_3857.transform(coord[0], coord[1])
-            fig.circle(transformed_coord[0], transformed_coord[1], size = 4)
+            lijstx.append(transformed_coord[0])
+            lijsty.append(transformed_coord[1])
+        fig.line(lijstx, lijsty, line_color="red", line_width=2)
 
     return fig
 
@@ -64,23 +82,23 @@ def draw_polygon(fig):
 
     data = {'xs': x_coords, 'ys': y_coords}
 
-    source = ColumnDataSource(data=data)
+    s1 = ColumnDataSource(data=data)
 
-    glyph = fig.multi_polygons(xs='ys', ys='xs', color="navy", name="pand", alpha=0.2, source=source)
-    glyph.tags = ['pand']
+    glyph = fig.multi_polygons(xs='ys', ys='xs', color="navy", name="pand", alpha=0.2, source=s1)
 
-    # fig patch does not work, can not click on patch
+    glyph_atrributes= ['x', 'y', 'sx', 'sy', 'name'] 
 
-    # works for points and polygons but not only for polygons
-    call = CustomJS(code="console.log('tap event occurred')")
+    # what happens in the call
+    call = CustomJS(code="console.log('tap event occurred');")
+
+    # option one, works for everything including canvas
+    # fig.js_on_event(events.Tap, call)
+
+    # option two, works for all glyphs
     tap = fig.select(type=TapTool)
     tap.callback = call
 
-    curdoc().add_root(fig)
-
-    # format for ColumnDataSource that multi_polygons can handle [[[[dsometehe]]], [[[dkhfaiwue]]]]
-
     return fig
 
-def callback_fcn(attr, old, new):
-    print("{} - {} - {}".format(attr, old, new))
+def callback(event):
+    print("Callback function working")
