@@ -16,7 +16,7 @@ def create_base_map():
 
     fig = figure(x_range=(530683.95, 555576.10), y_range=(6854570.54, 6876203.35),
                  x_axis_type="mercator", y_axis_type="mercator", plot_width=1000, plot_height=600,
-                 tools="tap,pan,wheel_zoom,reset")
+                 tools="pan,wheel_zoom,reset")
 
     fig.add_tile(tile_provider)
 
@@ -34,23 +34,6 @@ def convert(test):
     return final
 
 def add_public_transport(fig):
-    # lat, lon = 52.36, 4.9
-    # coord = TRAN_4326_TO_3857.transform(lat, lon)
-
-    # df = pd.read_csv('./data/tram_metro_lijnen.csv')
-
-    # df['WKT_LAT_LNG'] = df['WKT_LAT_LNG'].apply(convert)
-
-    # coords = df.iloc[0]['WKT_LAT_LNG']
-
-    # for i in range(len(df)):
-    #     coords = df.iloc[i]['WKT_LAT_LNG']
-
-    #     for coord in coords:
-    #         transformed_coord = TRAN_4326_TO_3857.transform(coord[0], coord[1])
-    #         fig.circle(transformed_coord[0], transformed_coord[1], size = 4)
-
-    # return fig
     df = pd.read_csv('./data/tram_metro_lijnen.csv')
     df['WKT_LAT_LNG'] = df['WKT_LAT_LNG'].apply(convert)
 
@@ -60,16 +43,21 @@ def add_public_transport(fig):
         lijstx = []
         # list with y-coordinates
         lijsty = []
+
         for j in range(0, len(coords), 4):
             coord = coords[j]
             transformed_coord = TRAN_4326_TO_3857.transform(coord[0], coord[1])
             lijstx.append(transformed_coord[0])
             lijsty.append(transformed_coord[1])
+
         fig.line(lijstx, lijsty, line_color="red", line_width=2)
 
     return fig
 
 def draw_polygon(fig):
+    # load data about buildings
+    # df = pd.read_csv("./data/Amsterdam_20panden.csv")
+    
     # test data for a house/building
     coordinates = [[53.31960, 6.81197], [53.31961, 6.81205], [53.31968, 6.81202], [53.31967, 6.81194], [53.31960, 6.81197]]
     # print(coordinates)
@@ -84,19 +72,23 @@ def draw_polygon(fig):
 
     s1 = ColumnDataSource(data=data)
 
+    # name is id number of building, tags to identify type of glyph
     glyph = fig.multi_polygons(xs='ys', ys='xs', color="navy", name="pand", alpha=0.2, source=s1)
-
-    glyph_atrributes= ['x', 'y', 'sx', 'sy', 'name'] 
+    glyph.tags = ["pand"]
 
     # what happens in the call
-    call = CustomJS(code="console.log('tap event occurred');")
+    call = CustomJS(args=dict(source=s1), code="console.log(cb_obj); console.log(source);")
 
     # option one, works for everything including canvas
     # fig.js_on_event(events.Tap, call)
 
     # option two, works for all glyphs
-    tap = fig.select(type=TapTool)
-    tap.callback = call
+    # tap = fig.select(type=TapTool)
+    # tap.callback = call
+
+    # option 3, only polygons are clickable !!!!!
+    tap = TapTool(renderers=[glyph], callback=call)
+    fig.tools.append(tap)
 
     return fig
 
