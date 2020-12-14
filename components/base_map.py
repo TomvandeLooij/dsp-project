@@ -1,4 +1,5 @@
 import pandas as pd
+import pyclipper
 
 from bokeh.plotting import figure
 from bokeh.tile_providers import get_provider, Vendors
@@ -45,14 +46,26 @@ def add_public_transport(fig):
 
 def draw_polygon(fig):
     # test data for a house/building
-    coordinates = [[53.31960, 6.81197], [53.31961, 6.81205], [53.31968, 6.81202], [53.31967, 6.81194], [53.31960, 6.81197]]
-    print(coordinates)
-    coordinates = [TRAN_4326_TO_3857.transform(coord[0], coord[1]) for coord in coordinates]
-    print(coordinates)
+    coordinates             = [[52.31960, 4.81197], [52.31961, 4.81205], [52.31968, 4.81202], [52.31967, 4.81194], [52.31960, 4.81197]]
+    transformed_coordinates = [TRAN_4326_TO_3857.transform(coord[0], coord[1]) for coord in coordinates]
+    
+    x_coords = [c[1] for c in transformed_coordinates]
+    y_coords = [c[0] for c in transformed_coordinates]
 
-    x_coords = [c[1] for c in coordinates]
-    y_coords = [c[0] for c in coordinates]
+    fig.patch(y_coords, x_coords, line_width=5, color="red")
 
-    fig.patch(y_coords, x_coords, alpha=0.2, line_width=1, color="navy")
+    clipper_offset     = pyclipper.PyclipperOffset()
+    coordinates_scaled = pyclipper.scale_to_clipper(coordinates)
+
+    clipper_offset.AddPath(coordinates_scaled, pyclipper.JT_ROUND, pyclipper.ET_CLOSEDPOLYGON)
+
+    new_coordinates    = clipper_offset.Execute(pyclipper.scale_to_clipper(.0001))
+    scaled_coordinates = pyclipper.scale_from_clipper(new_coordinates)
+    scaled_coordinates = [TRAN_4326_TO_3857.transform(coord[0], coord[1]) for coord in scaled_coordinates[0]]
+
+    x_coords_scaled = [c[1] for c in scaled_coordinates]
+    y_coords_scaled = [c[0] for c in scaled_coordinates]
+
+    fig.patch(y_coords_scaled, x_coords_scaled, line_width=5, alpha = 0.2, color="navy")
 
     return fig
