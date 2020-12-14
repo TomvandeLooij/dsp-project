@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, json
 from bokeh.embed import components
 from bokeh.resources import INLINE
 from bokeh.models.callbacks import CustomJS
@@ -19,7 +19,6 @@ def home():
     fig = base_map.create_base_map()
     fig = base_map.add_public_transport(fig)
     fig = base_map.draw_polygon(fig)
-    print("done with loading")
 
     # grab the static resources
     js_resources = INLINE.render_js()
@@ -35,14 +34,17 @@ def home():
         js_resources=js_resources,
         css_resources=css_resources)
 
-@app.route('/points/<pand_id>', methods=(['GET']))
+@app.route('/building/<pand_id>', methods=(['GET']))
 def get_information(pand_id):
+    print(pand_id)
+    print("this is working")
+
     # grab the static resources
     js_resources = INLINE.render_js()
     css_resources = INLINE.render_css()
 
     return render_template(
-        'index.html',
+        'export.html',
         js_resources = js_resources,
         css_resources = css_resources,
         plot_script = None

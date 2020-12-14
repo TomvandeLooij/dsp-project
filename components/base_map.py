@@ -77,11 +77,14 @@ def draw_polygon(fig):
 
     # what happens in the call
     call = CustomJS(code="""
-            var id = cb_obj.renderers[0].name; 
+            let id = cb_obj.renderers[0].name; 
             console.log(id);
 
-            /* here comes more code to do ajax callback*/
-
+            /* here comes ajax callback*/
+            $.ajax({
+                type:'GET',
+                url:('/building/' + id)
+            }).done(console.log("ajax request done"))
             """)
 
     # option 3, only polygons are clickable !!!!!
