@@ -60,10 +60,9 @@ def draw_polygon(fig):
     
     # test data for a house/building
     coordinates = [[53.31960, 6.81197], [53.31961, 6.81205], [53.31968, 6.81202], [53.31967, 6.81194], [53.31960, 6.81197]]
-    # print(coordinates)
     coordinates = [TRAN_4326_TO_3857.transform(coord[0], coord[1]) for coord in coordinates]
-    # print(coordinates)
     
+    # needs to be done for every building
     x_coords = [[[[c[1] for c in coordinates]]]]
     y_coords = [[[[c[0] for c in coordinates]]]]
     print(x_coords, y_coords)
@@ -73,18 +72,17 @@ def draw_polygon(fig):
     s1 = ColumnDataSource(data=data)
 
     # name is id number of building, tags to identify type of glyph
-    glyph = fig.multi_polygons(xs='ys', ys='xs', color="navy", name="pand", alpha=0.2, source=s1)
+    glyph = fig.multi_polygons(xs='ys', ys='xs', color="navy", name="here comes the id", alpha=0.2, source=s1)
     glyph.tags = ["pand"]
 
     # what happens in the call
-    call = CustomJS(args=dict(source=s1), code="console.log(cb_obj); console.log(source);")
+    call = CustomJS(code="""
+            var id = cb_obj.renderers[0].name; 
+            console.log(id);
 
-    # option one, works for everything including canvas
-    # fig.js_on_event(events.Tap, call)
+            /* here comes more code to do ajax callback*/
 
-    # option two, works for all glyphs
-    # tap = fig.select(type=TapTool)
-    # tap.callback = call
+            """)
 
     # option 3, only polygons are clickable !!!!!
     tap = TapTool(renderers=[glyph], callback=call)
