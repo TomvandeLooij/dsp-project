@@ -9,6 +9,9 @@
     </div>
 </div>
 <div class="row">
+    {{ js_resources|indent(4)|safe }}
+    {{ css_resources|indent(4)|safe }}
+    {{ plot_script|indent(4)|safe }}
     {{ plot_div|indent(4)|safe }}
 </div>
 

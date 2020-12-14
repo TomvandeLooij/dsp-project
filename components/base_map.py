@@ -59,7 +59,7 @@ def draw_polygon(fig):
     # df = pd.read_csv("./data/Amsterdam_20panden.csv")
     
     # test data for a house/building
-    coordinates = [[53.31960, 6.81197], [53.31961, 6.81205], [53.31968, 6.81202], [53.31967, 6.81194], [53.31960, 6.81197]]
+    coordinates = [[52.31960, 4.81197], [52.31961, 4.81205], [52.31968, 4.81202], [52.31967, 4.81194], [52.31960, 4.81197]]
     coordinates = [TRAN_4326_TO_3857.transform(coord[0], coord[1]) for coord in coordinates]
     
     # needs to be done for every building
@@ -72,7 +72,7 @@ def draw_polygon(fig):
     s1 = ColumnDataSource(data=data)
 
     # name is id number of building, tags to identify type of glyph
-    glyph = fig.multi_polygons(xs='ys', ys='xs', color="navy", name="here comes the id", alpha=0.2, source=s1)
+    glyph = fig.multi_polygons(xs='ys', ys='xs', color="navy", name="5", source=s1)
     glyph.tags = ["pand"]
 
     # what happens in the call
