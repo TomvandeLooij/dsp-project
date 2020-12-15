@@ -9,6 +9,7 @@ from bokeh.plotting import figure, curdoc
 from bokeh.layouts import column
 
 import pandas as pd
+from ast import literal_eval
 
 from .components import base_map
 
@@ -40,9 +41,11 @@ def home():
 @app.route('/building/<pand_id>', methods=(['GET']))
 def get_information(pand_id):
     df       = pd.read_csv('./data/test.csv')
-    building = df[df['pand_id'] == float(pand_id)]
 
-    fig = base_map.create_zoomed_map(building)
+    building    = df[df['pand_id'] == float(pand_id)]
+    coordinates = literal_eval(building.iloc[0]['WGS'])
+
+    fig = base_map.create_zoomed_map(coordinates)
     fig = base_map.add_public_transport(fig)
     fig = base_map.draw_polygon(fig)
     fig = base_map.draw_building_radius(fig, building)

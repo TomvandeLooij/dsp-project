@@ -25,9 +25,18 @@ def create_base_map():
     return fig
 
 def create_zoomed_map(coordinates):
+    y_coord = coordinates[0][0]
+    x_coord = coordinates[0][1]
+
+    point1 = TRAN_4326_TO_3857.transform(y_coord - 0.0004, x_coord - 0.002)
+    point2 = TRAN_4326_TO_3857.transform(y_coord + 0.0004, x_coord + 0.002)
+
+    x_range = (point1[0], point2[0])
+    y_range = (point1[1], point2[1])
+
     tile_provider = get_provider(Vendors.CARTODBPOSITRON_RETINA)
 
-    fig = figure(x_range=(530683.95, 555576.10), y_range=(6854570.54, 6876203.35),
+    fig = figure(x_range=x_range, y_range=y_range,
                  x_axis_type="mercator", y_axis_type="mercator", plot_width=1000, plot_height=600,
                  tools="pan,wheel_zoom,reset")
 
@@ -42,8 +51,6 @@ def draw_building_radius(fig, building):
     
     x_coords = [c[1] for c in transformed_coordinates]
     y_coords = [c[0] for c in transformed_coordinates]
-
-    # fig.patch(y_cozzords, x_coords, line_width=5, color="red")
 
     clipper_offset     = pyclipper.PyclipperOffset()
     coordinates_scaled = pyclipper.scale_to_clipper(coordinates)
