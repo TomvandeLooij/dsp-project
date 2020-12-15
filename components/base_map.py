@@ -50,7 +50,7 @@ def add_public_transport(fig):
             lijstx.append(transformed_coord[0])
             lijsty.append(transformed_coord[1])
 
-        fig.line(lijstx, lijsty, line_color="red", line_width=2)
+        fig.line(lijstx, lijsty, line_color="coral", line_width=2, alpha=0.8)
 
     return fig
 
