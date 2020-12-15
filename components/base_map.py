@@ -1,4 +1,6 @@
 import pandas as pd
+import numpy as np
+import pyclipper
 
 from bokeh.plotting import figure
 from bokeh.tile_providers import get_provider, Vendors
@@ -21,6 +23,44 @@ def create_base_map():
     fig.add_tile(tile_provider)
 
     return fig
+
+def create_zoomed_map(coordinates):
+    tile_provider = get_provider(Vendors.CARTODBPOSITRON_RETINA)
+
+    fig = figure(x_range=(530683.95, 555576.10), y_range=(6854570.54, 6876203.35),
+                 x_axis_type="mercator", y_axis_type="mercator", plot_width=1000, plot_height=600,
+                 tools="pan,wheel_zoom,reset")
+
+    fig.add_tile(tile_provider)
+
+    return fig
+
+def draw_building_radius(fig, building):
+    coordinates = literal_eval(building.iloc[0]['WGS'])
+
+    transformed_coordinates = [TRAN_4326_TO_3857.transform(coord[0], coord[1]) for coord in coordinates]
+    
+    x_coords = [c[1] for c in transformed_coordinates]
+    y_coords = [c[0] for c in transformed_coordinates]
+
+    # fig.patch(y_cozzords, x_coords, line_width=5, color="red")
+
+    clipper_offset     = pyclipper.PyclipperOffset()
+    coordinates_scaled = pyclipper.scale_to_clipper(coordinates)
+
+    clipper_offset.AddPath(coordinates_scaled, pyclipper.JT_ROUND, pyclipper.ET_CLOSEDPOLYGON)
+
+    new_coordinates    = clipper_offset.Execute(pyclipper.scale_to_clipper(.00025))
+    scaled_coordinates = pyclipper.scale_from_clipper(new_coordinates)
+    scaled_coordinates = [TRAN_4326_TO_3857.transform(coord[0], coord[1]) for coord in scaled_coordinates[0]]
+
+    x_coords_scaled = [c[1] for c in scaled_coordinates]
+    y_coords_scaled = [c[0] for c in scaled_coordinates]
+
+    fig.patch(y_coords_scaled, x_coords_scaled, line_width=5, alpha = 0.2, color="red")
+
+    return fig
+
 
 def convert(test):
     test2 = test.split(',')

@@ -8,6 +8,8 @@ from bokeh.models.tools import TapTool
 from bokeh.plotting import figure, curdoc
 from bokeh.layouts import column
 
+import pandas as pd
+
 from .components import base_map
 
 app = Flask(__name__)
@@ -37,12 +39,13 @@ def home():
 
 @app.route('/building/<pand_id>', methods=(['GET']))
 def get_information(pand_id):
-    print(pand_id)
-    print("this is working")
+    df       = pd.read_csv('./data/test.csv')
+    building = df[df['pand_id'] == float(pand_id)]
 
-    fig = base_map.create_base_map()
+    fig = base_map.create_zoomed_map(building)
     fig = base_map.add_public_transport(fig)
-    # fig = base_map.draw_polygon(fig)
+    fig = base_map.draw_polygon(fig)
+    fig = base_map.draw_building_radius(fig, building)
 
     # grab the static resources
     js_resources = INLINE.render_js()
