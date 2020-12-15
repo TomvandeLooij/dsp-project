@@ -17,7 +17,7 @@ ALOWED_CORS_DOMAIN = 'http://localhost:8080'
 @app.route('/', methods=(['GET']))
 def home():
     fig = base_map.create_base_map()
-    # fig = base_map.add_public_transport(fig)
+    fig = base_map.add_public_transport(fig)
     fig = base_map.draw_polygon(fig)
 
     # grab the static resources
@@ -40,8 +40,23 @@ def get_information(pand_id):
     print(pand_id)
     print("this is working")
 
+    fig = base_map.create_base_map()
+    fig = base_map.add_public_transport(fig)
+    # fig = base_map.draw_polygon(fig)
+
+    # grab the static resources
+    js_resources = INLINE.render_js()
+    css_resources = INLINE.render_css()
+
+    # # render template
+    script, div = components(fig)
+
     return render_template(
-        'export.html'
+        'building.html',
+        plot_script=script,
+        plot_div=div,
+        js_resources=js_resources,
+        css_resources=css_resources
     )
 
 @app.route('/export', methods=(['GET']))
