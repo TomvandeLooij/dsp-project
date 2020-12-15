@@ -95,5 +95,3 @@ def draw_polygon(fig):
 
     return fig
 
-def callback(event):
-    print("Callback function working")
