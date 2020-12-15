@@ -3,9 +3,7 @@ import pandas as pd
 from bokeh.plotting import figure
 from bokeh.tile_providers import get_provider, Vendors
 from bokeh.models.callbacks import CustomJS
-from bokeh.models import ColumnDataSource, TapTool, MultiPolygons, Patches, Select, Column, CustomJS
-from bokeh.io import curdoc
-from bokeh import events
+from bokeh.models import ColumnDataSource, TapTool, CustomJS
 
 from ast import literal_eval
 
@@ -71,23 +69,12 @@ def draw_polygon(fig):
         x_coords.append([[[c[1] for c in coords]]])
         y_coords.append([[[c[0] for c in coords]]])
 
-    # # # test data for a house/building
-    # coordinates = [[52.31960, 4.81197], [52.31961, 4.81205], [52.31968, 4.81202], [52.31967, 4.81194], [52.31960, 4.81197]]
-    # coordinates = [TRAN_4326_TO_3857.transform(coord[0], coord[1]) for coord in coordinates]
-
-    # # # needs to be done for every building
-    # x_coords.append([[[c[1] for c in coordinates]]])
-    # y_coords.append([[[c[0] for c in coordinates]]])
-    # print("x_coords:", x_coords)
-    # print("y_coords:", y_coords)
-
     data = {'xs': x_coords, 'ys': y_coords, 'id':list(df['pand_id'])}
     names = list(df['pand_id'])
 
     s1 = ColumnDataSource(data=data)
 
     # name is id number of building, tags to identify type of glyph
-    ### can't get name to be dynamic, defines it for every column
     glyph = fig.multi_polygons(xs='ys', ys='xs', color="navy", name="pand", source=s1, alpha=0.3)
 
     # what happens in the call
