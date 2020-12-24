@@ -93,10 +93,8 @@ def add_public_transport(fig):
         lijsty = []
 
         for j in range(0, len(coords), 4):
-            coord = coords[j]
-            transformed_coord = TRAN_4326_TO_3857.transform(coord[0], coord[1])
-            lijstx.append(transformed_coord[0])
-            lijsty.append(transformed_coord[1])
+            lijstx.append(coords[j][0])
+            lijsty.append(coords[j][1])
 
         fig.line(lijstx, lijsty, line_color="coral", line_width=2, alpha=0.8)
 
