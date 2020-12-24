@@ -76,7 +76,8 @@ def convert(test):
 
     final = []
     for coord in test3:
-        final.append([float(coord[0]), float(coord[1])])
+        transformed_coord = TRAN_4326_TO_3857.transform(float(coord[0]), float(coord[1]))
+        final.append([transformed_coord[0], transformed_coord[1]])
 
     return final
 
