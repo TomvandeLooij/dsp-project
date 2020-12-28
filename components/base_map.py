@@ -70,6 +70,7 @@ def draw_building_radius(fig, building):
 
 
 def convert(test):
+    test = test.replace('"', '')
     test2 = test.split(',')
 
     test3 = [x.split(' ') for x in test2]
@@ -92,12 +93,28 @@ def add_public_transport(fig):
         # list with y-coordinates
         lijsty = []
 
-        for j in range(0, len(coords), 4):
+        for j in range(0, len(coords), 1):
             lijstx.append(coords[j][0])
             lijsty.append(coords[j][1])
 
         fig.line(lijstx, lijsty, line_color="coral", line_width=2, alpha=0.8)
+    df = pd.read_csv('./data/TramMetroStations.csv', error_bad_lines=False, encoding="utf-8", delimiter=";")
+    print(df.columns)
 
+    df['WKT_stations'] = df['WKT_stations'].apply(convert)
+# error_bad_lines=False
+    for i in range(len(df)):
+        coords = df.iloc[i]['WKT_stations']
+        # list with x-coordinates     
+        lijstx = []
+        # list with y-coordinates
+        lijsty = []
+
+        for j in range(0, len(coords), 1):
+            lijstx.append(coords[j][0])
+            lijsty.append(coords[j][1])
+        fig.circle(lijstx, lijsty, alpha=0.8)    
+        # fig.line(lijstx, lijsty, line_color="coral", line_width=2, alpha=0.8)
     return fig
 
 def draw_polygon(fig):
