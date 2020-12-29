@@ -102,7 +102,6 @@ def add_public_transport(fig):
     print(df.columns)
 
     df['WKT_stations'] = df['WKT_stations'].apply(convert)
-# error_bad_lines=False
     for i in range(len(df)):
         coords = df.iloc[i]['WKT_stations']
         # list with x-coordinates     
@@ -113,8 +112,11 @@ def add_public_transport(fig):
         for j in range(0, len(coords), 1):
             lijstx.append(coords[j][0])
             lijsty.append(coords[j][1])
-        fig.circle(lijstx, lijsty, alpha=0.8)    
-        # fig.line(lijstx, lijsty, line_color="coral", line_width=2, alpha=0.8)
+        fig.circle(lijstx, lijsty, alpha=0.8) 
+        if df.iloc[i]['Modaliteit'] == 'Metro':
+            fig.line(lijstx, lijsty, line_color="blue", line_width=2, alpha=0.8)
+        else:
+            fig.line(lijstx, lijsty, line_color="green", line_width=2, alpha=0.8)
     return fig
 
 def draw_polygon(fig):
