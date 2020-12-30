@@ -14,6 +14,8 @@ from pyproj import Transformer, transform
 TRAN_4326_TO_3857 = Transformer.from_crs("EPSG:4326", "EPSG:3857")
 
 def create_base_map():
+    """Create base map to show all information on, map of Amsterdam"""
+
     tile_provider = get_provider(Vendors.CARTODBPOSITRON_RETINA)
 
     fig = figure(x_range=(530683.95, 555576.10), y_range=(6854570.54, 6876203.35),
@@ -25,6 +27,8 @@ def create_base_map():
     return fig
 
 def create_zoomed_map(coordinates):
+    """Makes the map zoom in on the selected building"""
+
     y_coord = coordinates[0][0]
     x_coord = coordinates[0][1]
 
@@ -45,13 +49,17 @@ def create_zoomed_map(coordinates):
     return fig
 
 def draw_building_radius(fig, building):
-    coordinates = literal_eval(building.iloc[0]['WGS'])
+    """Draws a radius around a building to show blockage by the fire department"""
 
+    # get coordintes and transforms them to be usable for the map
+    coordinates = literal_eval(building.iloc[0]['WGS'])
     transformed_coordinates = [TRAN_4326_TO_3857.transform(coord[0], coord[1]) for coord in coordinates]
     
+    # get x and y coordinates of building
     x_coords = [c[1] for c in transformed_coordinates]
     y_coords = [c[0] for c in transformed_coordinates]
 
+    # calculate coordinates of radius around the building (on original coordinates not transformed)
     clipper_offset     = pyclipper.PyclipperOffset()
     coordinates_scaled = pyclipper.scale_to_clipper(coordinates)
 
@@ -61,15 +69,19 @@ def draw_building_radius(fig, building):
     scaled_coordinates = pyclipper.scale_from_clipper(new_coordinates)
     scaled_coordinates = [TRAN_4326_TO_3857.transform(coord[0], coord[1]) for coord in scaled_coordinates[0]]
 
+    # get x and y coordinates of radius
     x_coords_scaled = [c[1] for c in scaled_coordinates]
     y_coords_scaled = [c[0] for c in scaled_coordinates]
 
+    # draw radius on map
     fig.patch(y_coords_scaled, x_coords_scaled, line_width=5, alpha = 0.2, color="red")
 
     return fig
 
 
 def convert(test):
+    """Convert string of coordinates to list of list (inner list is xy coordinates) and transforms them"""
+
     test = test.replace('"', '')
     test2 = test.split(',')
 
@@ -98,6 +110,7 @@ def add_public_transport(fig):
             lijsty.append(coords[j][1])
 
         fig.line(lijstx, lijsty, line_color="coral", line_width=2, alpha=0.8)
+    
     df = pd.read_csv('./data/TramMetroStations.csv', error_bad_lines=False, encoding="utf-8", delimiter=";")
     print(df.columns)
 
@@ -120,6 +133,8 @@ def add_public_transport(fig):
     return fig
 
 def draw_polygon(fig):
+    """"Draws all polygons given in the dataset and makes them clickable"""
+
     # load data about buildings
     df = pd.read_csv("./data/test.csv")
     print(len(df))
@@ -127,6 +142,7 @@ def draw_polygon(fig):
     x_coords = []
     y_coords = []
 
+    # split coordinates to x and y coordinates
     for i in range(len(df)):
         coords = df.iloc[i]['WGS']
         coords = literal_eval(coords)
