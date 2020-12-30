@@ -5,7 +5,7 @@ import pyclipper
 from bokeh.plotting import figure
 from bokeh.tile_providers import get_provider, Vendors
 from bokeh.models.callbacks import CustomJS
-from bokeh.models import ColumnDataSource, TapTool, CustomJS
+from bokeh.models import ColumnDataSource, TapTool, CustomJS, HoverTool
 
 from ast import literal_eval
 
@@ -153,9 +153,10 @@ def draw_polygon(fig):
     data = {'xs': x_coords, 'ys': y_coords, 'id':list(df['pand_id'])}
     names = list(df['pand_id'])
 
+    # set source for polygons
     s1 = ColumnDataSource(data=data)
 
-    # name is id number of building, tags to identify type of glyph
+    # all buildings to be plotted on map
     glyph = fig.multi_polygons(xs='ys', ys='xs', color="navy", name="pand", source=s1, alpha=0.3)
 
     # what happens in the call
@@ -172,7 +173,14 @@ def draw_polygon(fig):
 
     # only make polygons clickable
     tap = TapTool(renderers=[glyph], callback=call)
-    fig.tools.append(tap)
+    fig.add_tools(tap)
+
+    # create hovertool
+    fig.add_tools(HoverTool(
+        tooltips=[
+            # use @{ } for field names with spaces
+            ( 'id',   '@id'),
+        ]
+    ))
 
     return fig
-
