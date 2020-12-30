@@ -52,7 +52,7 @@ def draw_building_radius(fig, building):
     """Draws a radius around a building to show blockage by the fire department"""
 
     # get coordintes and transforms them to be usable for the map
-    coordinates = literal_eval(building.iloc[0]['WGS'])
+    coordinates = literal_eval(building.iloc[0]['wgs'])
     transformed_coordinates = [TRAN_4326_TO_3857.transform(coord[0], coord[1]) for coord in coordinates]
     
     # get x and y coordinates of building
@@ -109,35 +109,35 @@ def add_public_transport(fig):
             lijstx.append(coords[j][0])
             lijsty.append(coords[j][1])
 
-        fig.line(lijstx, lijsty, line_color="coral", line_width=2, alpha=0.8)
+        fig.line(lijstx, lijsty, line_color="coral", line_width=2, alpha=0.8, legend_label="tram + metro")
+    
+    df = pd.read_csv('./data/TramMetroStations.csv', error_bad_lines=False, encoding="utf-8", delimiter=";")
+    print(df.columns)
+
+    df['WKT_stations'] = df['WKT_stations'].apply(convert)
+    for i in range(len(df)):
+        coords = df.iloc[i]['WKT_stations']
+        # list with x-coordinates     
+        lijstx = []
+        # list with y-coordinates
+        lijsty = []
+
+        for j in range(0, len(coords), 1):
+            lijstx.append(coords[j][0])
+            lijsty.append(coords[j][1])
+        fig.circle(lijstx, lijsty, alpha=0.8) 
+        if df.iloc[i]['Modaliteit'] == 'Metro':
+            fig.line(lijstx, lijsty, line_color="blue", line_width=2, alpha=0.8, legend_label="Metro")
+        else:
+            fig.line(lijstx, lijsty, line_color="green", line_width=2, alpha=0.8, legend_label="Tram")
 
     return fig
-    
-    # df = pd.read_csv('./data/TramMetroStations.csv', error_bad_lines=False, encoding="utf-8", delimiter=";")
-    # print(df.columns)
-
-    # df['WKT_stations'] = df['WKT_stations'].apply(convert)
-    # for i in range(len(df)):
-    #     coords = df.iloc[i]['WKT_stations']
-    #     # list with x-coordinates     
-    #     lijstx = []
-    #     # list with y-coordinates
-    #     lijsty = []
-
-    #     for j in range(0, len(coords), 1):
-    #         lijstx.append(coords[j][0])
-    #         lijsty.append(coords[j][1])
-    #     fig.circle(lijstx, lijsty, alpha=0.8) 
-    #     if df.iloc[i]['Modaliteit'] == 'Metro':
-    #         fig.line(lijstx, lijsty, line_color="blue", line_width=2, alpha=0.8)
-    #     else:
-    #         fig.line(lijstx, lijsty, line_color="green", line_width=2, alpha=0.8)
 
 def draw_polygon(fig):
     """"Draws all polygons given in the dataset and makes them clickable"""
 
     # load data about buildings
-    df = pd.read_csv("./data/test.csv")
+    df = pd.read_csv("./data/info_zuid_wgs.csv")
     print(len(df))
 
     x_coords = []
@@ -145,7 +145,7 @@ def draw_polygon(fig):
 
     # split coordinates to x and y coordinates
     for i in range(len(df)):
-        coords = df.iloc[i]['WGS']
+        coords = df.iloc[i]['wgs']
         coords = literal_eval(coords)
         coords = [TRAN_4326_TO_3857.transform(float(coord[0]), float(coord[1])) for coord in coords]
         x_coords.append([[[c[1] for c in coords]]])
