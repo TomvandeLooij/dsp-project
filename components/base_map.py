@@ -20,7 +20,7 @@ def create_base_map():
 
     fig = figure(x_range=(530683.95, 555576.10), y_range=(6854570.54, 6876203.35),
                  x_axis_type="mercator", y_axis_type="mercator", plot_width=1000, plot_height=600,
-                 tools="pan,wheel_zoom,reset")
+                 tools="pan,wheel_zoom,reset", active_scroll='wheel_zoom')
 
     fig.add_tile(tile_provider)
 
@@ -42,7 +42,7 @@ def create_zoomed_map(coordinates):
 
     fig = figure(x_range=x_range, y_range=y_range,
                  x_axis_type="mercator", y_axis_type="mercator", plot_width=1000, plot_height=600,
-                 tools="pan,wheel_zoom,reset")
+                 tools="pan,wheel_zoom,reset", active_scroll='wheel_zoom')
 
     fig.add_tile(tile_provider)
 
@@ -110,27 +110,28 @@ def add_public_transport(fig):
             lijsty.append(coords[j][1])
 
         fig.line(lijstx, lijsty, line_color="coral", line_width=2, alpha=0.8)
-    
-    df = pd.read_csv('./data/TramMetroStations.csv', error_bad_lines=False, encoding="utf-8", delimiter=";")
-    print(df.columns)
 
-    df['WKT_stations'] = df['WKT_stations'].apply(convert)
-    for i in range(len(df)):
-        coords = df.iloc[i]['WKT_stations']
-        # list with x-coordinates     
-        lijstx = []
-        # list with y-coordinates
-        lijsty = []
-
-        for j in range(0, len(coords), 1):
-            lijstx.append(coords[j][0])
-            lijsty.append(coords[j][1])
-        fig.circle(lijstx, lijsty, alpha=0.8) 
-        if df.iloc[i]['Modaliteit'] == 'Metro':
-            fig.line(lijstx, lijsty, line_color="blue", line_width=2, alpha=0.8)
-        else:
-            fig.line(lijstx, lijsty, line_color="green", line_width=2, alpha=0.8)
     return fig
+    
+    # df = pd.read_csv('./data/TramMetroStations.csv', error_bad_lines=False, encoding="utf-8", delimiter=";")
+    # print(df.columns)
+
+    # df['WKT_stations'] = df['WKT_stations'].apply(convert)
+    # for i in range(len(df)):
+    #     coords = df.iloc[i]['WKT_stations']
+    #     # list with x-coordinates     
+    #     lijstx = []
+    #     # list with y-coordinates
+    #     lijsty = []
+
+    #     for j in range(0, len(coords), 1):
+    #         lijstx.append(coords[j][0])
+    #         lijsty.append(coords[j][1])
+    #     fig.circle(lijstx, lijsty, alpha=0.8) 
+    #     if df.iloc[i]['Modaliteit'] == 'Metro':
+    #         fig.line(lijstx, lijsty, line_color="blue", line_width=2, alpha=0.8)
+    #     else:
+    #         fig.line(lijstx, lijsty, line_color="green", line_width=2, alpha=0.8)
 
 def draw_polygon(fig):
     """"Draws all polygons given in the dataset and makes them clickable"""
@@ -150,7 +151,7 @@ def draw_polygon(fig):
         x_coords.append([[[c[1] for c in coords]]])
         y_coords.append([[[c[0] for c in coords]]])
 
-    data = {'xs': x_coords, 'ys': y_coords, 'id':list(df['pand_id'])}
+    data = {'xs': x_coords, 'ys': y_coords, 'id':list(df['pand_id']), 'functie':list(df['gebruiksdoelVerblijfsobject'])}
     names = list(df['pand_id'])
 
     # set source for polygons
@@ -177,10 +178,16 @@ def draw_polygon(fig):
 
     # create hovertool
     fig.add_tools(HoverTool(
+        renderers=[glyph],
         tooltips=[
             # use @{ } for field names with spaces
-            ( 'id',   '@id'),
-        ]
+            ( 'id'              , '@id'),
+            ( 'gebruiksfunctie' , '@functie')
+        ],
+        formatters = {
+            'id'        : 'printf',
+            'functie'   : 'printf'
+        }
     ))
 
     return fig
