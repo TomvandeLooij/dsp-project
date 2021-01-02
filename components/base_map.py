@@ -2,10 +2,10 @@ import pandas as pd
 import numpy as np
 import pyclipper
 
-from bokeh.plotting import figure
+from bokeh.plotting import figure, show
 from bokeh.tile_providers import get_provider, Vendors
 from bokeh.models.callbacks import CustomJS
-from bokeh.models import ColumnDataSource, TapTool, CustomJS, HoverTool
+from bokeh.models import ColumnDataSource, TapTool, CustomJS, HoverTool, Line, MultiLine
 
 from ast import literal_eval
 
@@ -19,7 +19,7 @@ def create_base_map():
     tile_provider = get_provider(Vendors.CARTODBPOSITRON_RETINA)
 
     fig = figure(x_range=(530683.95, 555576.10), y_range=(6854570.54, 6876203.35),
-                 x_axis_type="mercator", y_axis_type="mercator", plot_width=1000, plot_height=600,
+                 x_axis_type="mercator", y_axis_type="mercator", plot_width=900, plot_height=600,
                  tools="pan,wheel_zoom,reset", active_scroll='wheel_zoom')
 
     fig.add_tile(tile_provider)
@@ -41,7 +41,7 @@ def create_zoomed_map(coordinates):
     tile_provider = get_provider(Vendors.CARTODBPOSITRON_RETINA)
 
     fig = figure(x_range=x_range, y_range=y_range,
-                 x_axis_type="mercator", y_axis_type="mercator", plot_width=1000, plot_height=600,
+                 x_axis_type="mercator", y_axis_type="mercator", plot_width=900, plot_height=600,
                  tools="pan,wheel_zoom,reset", active_scroll='wheel_zoom')
 
     fig.add_tile(tile_provider)
@@ -51,13 +51,11 @@ def create_zoomed_map(coordinates):
 def draw_building_radius(fig, building):
     """Draws a radius around a building to show blockage by the fire department"""
 
+    # radius in meters/kilometers
+    radius = 25/100000
+
     # get coordintes and transforms them to be usable for the map
     coordinates = literal_eval(building.iloc[0]['wgs'])
-    transformed_coordinates = [TRAN_4326_TO_3857.transform(coord[0], coord[1]) for coord in coordinates]
-    
-    # get x and y coordinates of building
-    x_coords = [c[1] for c in transformed_coordinates]
-    y_coords = [c[0] for c in transformed_coordinates]
 
     # calculate coordinates of radius around the building (on original coordinates not transformed)
     clipper_offset     = pyclipper.PyclipperOffset()
@@ -65,7 +63,7 @@ def draw_building_radius(fig, building):
 
     clipper_offset.AddPath(coordinates_scaled, pyclipper.JT_ROUND, pyclipper.ET_CLOSEDPOLYGON)
 
-    new_coordinates    = clipper_offset.Execute(pyclipper.scale_to_clipper(.00025))
+    new_coordinates    = clipper_offset.Execute(pyclipper.scale_to_clipper(radius))
     scaled_coordinates = pyclipper.scale_from_clipper(new_coordinates)
     scaled_coordinates = [TRAN_4326_TO_3857.transform(coord[0], coord[1]) for coord in scaled_coordinates[0]]
 
@@ -109,8 +107,7 @@ def add_public_transport(fig):
             lijstx.append(coords[j][0])
             lijsty.append(coords[j][1])
 
-        fig.line(lijstx, lijsty, line_color="coral", line_width=2, alpha=0.8, legend_label="tram + metro")
-    
+        fig.line(lijstx, lijsty, line_color="coral", line_width=2, alpha=0.8)
     df = pd.read_csv('./data/TramMetroStations.csv', error_bad_lines=False, encoding="utf-8", delimiter=";")
     print(df.columns)
 
@@ -127,18 +124,16 @@ def add_public_transport(fig):
             lijsty.append(coords[j][1])
         fig.circle(lijstx, lijsty, alpha=0.8) 
         if df.iloc[i]['Modaliteit'] == 'Metro':
-            fig.line(lijstx, lijsty, line_color="blue", line_width=2, alpha=0.8, legend_label="Metro")
+            fig.line(lijstx, lijsty, line_color="blue", line_width=2, alpha=0.8)
         else:
-            fig.line(lijstx, lijsty, line_color="green", line_width=2, alpha=0.8, legend_label="Tram")
-
+            fig.line(lijstx, lijsty, line_color="green", line_width=2, alpha=0.8)
     return fig
 
 def draw_polygon(fig):
     """"Draws all polygons given in the dataset and makes them clickable"""
 
     # load data about buildings
-    df = pd.read_csv("./data/info_zuid_wgs.csv")
-    print(len(df))
+    df = pd.read_csv("./data/pand_final_zuid.csv")
 
     x_coords = []
     y_coords = []
@@ -152,7 +147,6 @@ def draw_polygon(fig):
         y_coords.append([[[c[0] for c in coords]]])
 
     data = {'xs': x_coords, 'ys': y_coords, 'id':list(df['pand_id']), 'functie':list(df['gebruiksdoelVerblijfsobject'])}
-    names = list(df['pand_id'])
 
     # set source for polygons
     s1 = ColumnDataSource(data=data)
