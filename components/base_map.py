@@ -7,10 +7,13 @@ from bokeh.tile_providers import get_provider, Vendors
 from bokeh.models.callbacks import CustomJS
 from bokeh.models import ColumnDataSource, TapTool, CustomJS, HoverTool, Line, MultiLine
 
-from ast import literal_eval
-
 from pyproj import Transformer, transform
+from ast import literal_eval
+from collections import Counter, OrderedDict
+
+# can be deleted at the end
 import time
+
 
 TRAN_4326_TO_3857 = Transformer.from_crs("EPSG:4326", "EPSG:3857")
 
@@ -185,7 +188,22 @@ def draw_polygon(fig, building):
     end = time.time()
     print(end - start)
 
-    data = {'xs': x_coords, 'ys': y_coords, 'id':list(df["pand_id"]),  'full_adress':list(df['full_adress'])}
+    data = {'xs': x_coords, 'ys': y_coords, 'id':list(df["pand_id"]),  'full_adress':list(df['full_adress']), 
+            'functions':list(df['gebruiksdoelVerblijfsobject'])}
+
+    data['full_adress'] = [item.replace("\n", "<br>") for item in data['full_adress']]
+    
+    # set functions in proper form for hovertool
+    all_functions = []
+    for item in data["functions"]:
+        item = dict(Counter(literal_eval(item)))
+        string = str()
+        for element in item:
+            string = string + str(element) + " " + str(item[element]) + "<br>"
+        all_functions.append(string)
+
+
+    data['functions'] = all_functions
 
     # set source for polygons
     s1 = ColumnDataSource(data=data)
@@ -212,15 +230,34 @@ def draw_polygon(fig, building):
     # create hovertool
     fig.add_tools(HoverTool(
         renderers=[glyph],
-        tooltips=[
+        tooltips=
+        # """
+        # adress: <br> @full_adress{safe}
+        # """,
+        
+        [
             # use @{ } for field names with spaces
-            ( 'adress'          , '@full_adress'),
-            ( 'try', 'this is a try \\n this is a try \n this is a try')
+            ( 'adress'          , '@full_adress{safe}'),
+            ( 'functions',          '@functions{safe}')
         ],
         formatters = {
             'full_adress'    : 'printf',
-            'try':'printf'
+            'functions'      : 'printf'
         }
     ))
 
     return fig
+
+def get_info(building, fire):
+    df = pd.read_csv("./data/final_csv_for_buildings.csv")
+    # get all functions from building
+    df_building = df[df.pand_id == float(building)]
+    
+    functions_building = literal_eval(df_building.gebruiksdoelVerblijfsobject.values[0])
+    functions = Counter(functions_building)
+    
+    # get neighbors
+
+    # get linking
+
+    return functions

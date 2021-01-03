@@ -62,9 +62,13 @@ def get_information(pand_id):
     # render template
     script, div = components(fig)
 
+    # get information to show on html
+    info = base_map.get_info(pand_id, fire)
+
     return render_template(
         'building.html',
-        id=str(building['full_adress'].values[0]),
+        adress=str(building['full_adress'].values[0]),
+        give_info=dict(info),
         plot_script=script,
         plot_div=div,
         js_resources=js_resources,

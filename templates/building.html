@@ -17,7 +17,12 @@
             {{ plot_div|indent(4)|safe }}
         </div>  
         <div class="col-2 border">
-            <p><b>Adress(es)</b> <br /> {{id}}
+            <p><b>Adress(es)</b> <br /> {{adress}}
+            </p>
+            <p> <b>Present in the building: </b> <br />
+                {% for key, value in give_info.items() %}
+                {{value}} {{key}} <br/>
+                {% endfor %}
             </p>
         </div>
         <div class="col border"></div>
