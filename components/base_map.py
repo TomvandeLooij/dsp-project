@@ -10,6 +10,7 @@ from bokeh.models import ColumnDataSource, TapTool, CustomJS, HoverTool, Line, M
 from ast import literal_eval
 
 from pyproj import Transformer, transform
+import time
 
 TRAN_4326_TO_3857 = Transformer.from_crs("EPSG:4326", "EPSG:3857")
 
@@ -48,11 +49,14 @@ def create_zoomed_map(coordinates):
 
     return fig
 
-def draw_building_radius(fig, building):
+def draw_building_radius(fig, building, fire):
     """Draws a radius around a building to show blockage by the fire department"""
-
-    # radius in meters/kilometers
-    radius = 25/100000
+    
+    # radius in meters/kilometers based on fire size
+    if fire == "small":
+        radius = 10/100000
+    elif fire == "big":
+        radius = 25/100000
 
     # get coordintes and transforms them to be usable for the map
     coordinates = literal_eval(building.iloc[0]['wgs'])
@@ -129,15 +133,47 @@ def add_public_transport(fig):
             fig.line(lijstx, lijsty, line_color="green", line_width=2, alpha=0.8)
     return fig
 
-def draw_polygon(fig):
+def draw_polygon(fig, building):
     """"Draws all polygons given in the dataset and makes them clickable"""
+    print(building)
 
     # load data about buildings
+    fields = ['pand_id', 'wgs', 'full_adress']
+
     df = pd.read_csv("./data/final_csv_for_buildings.csv")
+
+    # if a building is selected
+    if building != "not":
+        df_building = df[df.pand_id == float(building)]
+        df = df[df.pand_id != building]
+        print(df_building)
+        
+        x_coords = []
+        y_coords = []
+
+        # split coordinates to x and y coordinates
+        for i in range(len(df_building)):
+            coords = df_building.iloc[i]['wgs']
+            coords = literal_eval(coords)
+            coords = [TRAN_4326_TO_3857.transform(float(coord[0]), float(coord[1])) for coord in coords]
+            x_coords.append([[[c[1] for c in coords]]])
+            y_coords.append([[[c[0] for c in coords]]])
+        
+        data = {'xs': x_coords, 'ys': y_coords, 'id':list(df_building["pand_id"]),  'full_adress':list(df_building['full_adress'])}
+
+        # # set source for polygons
+        s2 = ColumnDataSource(data=data)
+
+        # # all buildings to be plotted on map
+        glyph_2 = fig.multi_polygons(xs='ys', ys='xs', color="red", name="pand", source=s2, alpha=1)
 
     x_coords = []
     y_coords = []
 
+    start = time.time()
+    print("time elapsed:", end="")
+
+    # time save use apply function instead of looping 4 seconds just for this part
     # split coordinates to x and y coordinates
     for i in range(len(df)):
         coords = df.iloc[i]['wgs']
@@ -145,8 +181,11 @@ def draw_polygon(fig):
         coords = [TRAN_4326_TO_3857.transform(float(coord[0]), float(coord[1])) for coord in coords]
         x_coords.append([[[c[1] for c in coords]]])
         y_coords.append([[[c[0] for c in coords]]])
+    
+    end = time.time()
+    print(end - start)
 
-    data = {'xs': x_coords, 'ys': y_coords, 'id':list(df['pand_id']), 'functie':list(df['gebruiksdoelVerblijfsobject'])}
+    data = {'xs': x_coords, 'ys': y_coords, 'id':list(df["pand_id"]),  'full_adress':list(df['full_adress'])}
 
     # set source for polygons
     s1 = ColumnDataSource(data=data)
@@ -175,12 +214,12 @@ def draw_polygon(fig):
         renderers=[glyph],
         tooltips=[
             # use @{ } for field names with spaces
-            ( 'id'              , '@id'),
-            ( 'gebruiksfunctie' , '@functie')
+            ( 'adress'          , '@full_adress'),
+            ( 'try', 'this is a try \\n this is a try \n this is a try')
         ],
         formatters = {
-            'id'        : 'printf',
-            'functie'   : 'printf'
+            'full_adress'    : 'printf',
+            'try':'printf'
         }
     ))
 
