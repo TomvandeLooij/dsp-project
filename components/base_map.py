@@ -136,7 +136,7 @@ def add_public_transport(fig):
             fig.line(lijstx, lijsty, line_color="green", line_width=2, alpha=0.8)
     return fig
 
-def draw_polygon(fig, building):
+def draw_polygon(fig, building, fire):
     """"Draws all polygons given in the dataset and makes them clickable"""
     print(building)
 
@@ -149,7 +149,6 @@ def draw_polygon(fig, building):
     if building != "not":
         df_building = df[df.pand_id == float(building)]
         df = df[df.pand_id != building]
-        print(df_building)
         
         x_coords = []
         y_coords = []
@@ -212,15 +211,19 @@ def draw_polygon(fig, building):
     glyph = fig.multi_polygons(xs='ys', ys='xs', color="navy", name="pand", source=s1, alpha=0.3)
 
     # what happens in the call
-    call = CustomJS(args=dict(source=s1), code="""
+    call = CustomJS(args=dict(source=s1, fire=fire), code="""
             /* console.log(cb_data.source.selected.indices[0]); */
 
             let idx = cb_data.source.selected.indices[0];
             let pand_id = source.data.id[idx];
             console.log(pand_id);
 
-            /* here comes ajax callback*/
-            window.location = ("http://127.0.0.1:5000/building/" + pand_id)
+            /* here comes ajax callback, default fire size is small*/
+            if (fire == "not") {
+                window.location = ("http://127.0.0.1:5000/building/" + pand_id + "/small")
+            } else {
+                window.location = ("http://127.0.0.1:5000/building/" + pand_id + "/" + fire)
+            }
             """)
 
     # only make polygons clickable
@@ -249,15 +252,26 @@ def draw_polygon(fig, building):
     return fig
 
 def get_info(building, fire):
-    df = pd.read_csv("./data/final_csv_for_buildings.csv")
+    df = pd.read_csv("./data/final_csv_for_buildings.csv", usecols=["pand_id", "gebruiksdoelVerblijfsobject", "neighbors", "small_linked", "big_linked"])
+    
     # get all functions from building
     df_building = df[df.pand_id == float(building)]
-    
     functions_building = literal_eval(df_building.gebruiksdoelVerblijfsobject.values[0])
     functions = Counter(functions_building)
     
-    # get neighbors
+    # get neighbors functions
+    df_neighbors = list(df[df.pand_id.isin(literal_eval(df_building.neighbors.values[0]))].gebruiksdoelVerblijfsobject)
+    neighbor_functions = [item for lijst in df_neighbors for item in literal_eval(lijst)]
+    neighbor_functions = Counter(neighbor_functions)
 
-    # get linking
+    # get linking for big or small fire
+    if fire == "small":
+        column = "small_linked"
+    elif fire == "big":
+        column = "big_linked"
 
-    return functions
+    linked_buildings = list(df[df.pand_id.isin(literal_eval(df_building[column].values[0]))].gebruiksdoelVerblijfsobject)
+    linked_functions = [item for lijst in linked_buildings for item in literal_eval(lijst)]
+    linked_functions = Counter(linked_functions)
+
+    return dict(functions), dict(neighbor_functions), dict(linked_functions)

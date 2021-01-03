@@ -9,18 +9,31 @@
         </div>
     </div>
     <div class="row">
-        <div class="col border"></div>
+        <div class="col border">
+        </div>
         <div class="col border border-primary">
             {{ js_resources|indent(4)|safe }}
             {{ css_resources|indent(4)|safe }}
             {{ plot_script|indent(4)|safe }}
             {{ plot_div|indent(4)|safe }}
         </div>  
-        <div class="col-2 border">
-            <p><b>Adress(es)</b> <br /> {{adress}}
+        <div class="col-4 border">
+            <a type="button" class="btn btn-primary {{small_active}}" href={{link_small}}>Small Fire</a>
+            <a type="button" class="btn btn-primary {{big_active}}" href={{link_big}}>Big Fire</a>
+            <p><b>Adress(es)</b> <br /> {{adress|safe}}
             </p>
             <p> <b>Present in the building: </b> <br />
-                {% for key, value in give_info.items() %}
+                {% for key, value in building_info.items() %}
+                {{value}} {{key}} <br/>
+                {% endfor %}
+            </p>
+            <p><b>Adjacent buildings:</b><br>
+                {% for key, value in neighbor_info.items() %}
+                {{value}} {{key}} <br/>
+                {% endfor %}
+            </p>
+            <p><b>Buildings in radius:</b><br>
+                {% for key, value in radius_info.items() %}
                 {{value}} {{key}} <br/>
                 {% endfor %}
             </p>
