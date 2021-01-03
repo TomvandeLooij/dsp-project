@@ -133,7 +133,7 @@ def draw_polygon(fig):
     """"Draws all polygons given in the dataset and makes them clickable"""
 
     # load data about buildings
-    df = pd.read_csv("./data/pand_final_zuid.csv")
+    df = pd.read_csv("./data/final_csv_for_buildings.csv")
 
     x_coords = []
     y_coords = []
