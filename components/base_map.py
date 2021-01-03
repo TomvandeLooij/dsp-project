@@ -94,51 +94,74 @@ def convert(test):
 
     final = []
     for coord in test3:
+        if len(coord)>2:
+            coord = [c for c in coord if c != ""]
         transformed_coord = TRAN_4326_TO_3857.transform(float(coord[0]), float(coord[1]))
         final.append([transformed_coord[0], transformed_coord[1]])
 
     return final
 
 def add_public_transport(fig):
-    df = pd.read_csv('./data/tram_metro_lijnen.csv')
+    # add lines to plot
+    df = pd.read_csv("./data/tram_metro_lijnen.csv")
     df['WKT_LAT_LNG'] = df['WKT_LAT_LNG'].apply(convert)
 
     for i in range(len(df)):
-        coords = df.iloc[i]['WKT_LAT_LNG']
-        # list with x-coordinates
-        lijstx = []
-        # list with y-coordinates
-        lijsty = []
+        coordsx = []
+        coordsy = []
+        for coord in df.iloc[i]['WKT_LAT_LNG']:
+            coordsx.append(coord[0])
+            coordsy.append(coord[1])
 
-        for j in range(0, len(coords), 1):
-            lijstx.append(coords[j][0])
-            lijsty.append(coords[j][1])
+        modaliteit = [df.iloc[i].Modaliteit for item in range(len(coordsx))]
+        lijn = [df.iloc[i].Lijn for item in range(len(coordsx))]
+        
+        source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy, "modality":modaliteit, "lijn":lijn})
 
-        fig.line(lijstx, lijsty, line_color="coral", line_width=2, alpha=0.8)
-    df = pd.read_csv('./data/TramMetroStations.csv', error_bad_lines=False, encoding="utf-8", delimiter=";")
-    print(df.columns)
+        if modaliteit[0] == "Tram":
+            fig.line("coordsx", "coordsy", line_color="blue", line_width=2.5, alpha=0.8, name="ov", source=source, legend_label="Tram")
+        elif modaliteit[0] == "Metro":
+            fig.line("coordsx", "coordsy", line_color="green", line_width=2.5, alpha=0.8, name="ov", source=source, legend_label="Metro")
 
-    df['WKT_stations'] = df['WKT_stations'].apply(convert)
+    fig.add_tools(HoverTool(
+        names=['ov'],
+        tooltips=[
+            ("line", "@lijn @modality")
+        ]
+    ))
+
+    # add stations to plot
+    df = pd.read_csv('./data/TRAMMETRO_PUNTEN_2020.csv', error_bad_lines=False, encoding="utf-8", delimiter=";")
+
+    df['WKT_LAT_LNG'] = df['WKT_LAT_LNG'].apply(lambda x: x.replace("POINT(", "").replace(")", ""))
     for i in range(len(df)):
-        coords = df.iloc[i]['WKT_stations']
-        # list with x-coordinates     
-        lijstx = []
-        # list with y-coordinates
-        lijsty = []
+        coordsx = []
+        coordsy = []
+        coords = df.iloc[i]['WKT_LAT_LNG'].split(",")
+        transformed_coord = TRAN_4326_TO_3857.transform(float(coords[0]), float(coords[1]))
+        coordsx.append(transformed_coord[0])
+        coordsy.append(transformed_coord[1])
+        modaliteit = [df.iloc[i].Modaliteit]
+        lijn = [df.iloc[i].Lijn]
+        stations = [df.iloc[i].Naam]
 
-        for j in range(0, len(coords), 1):
-            lijstx.append(coords[j][0])
-            lijsty.append(coords[j][1])
-        fig.circle(lijstx, lijsty, alpha=0.8) 
-        if df.iloc[i]['Modaliteit'] == 'Metro':
-            fig.line(lijstx, lijsty, line_color="blue", line_width=2, alpha=0.8)
-        else:
-            fig.line(lijstx, lijsty, line_color="green", line_width=2, alpha=0.8)
+        source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy, "modality":modaliteit, "lijn":lijn, "station":stations})
+
+        fig.circle("coordsx", "coordsy", alpha=0.8, name="stations", color="black", size=5, source=source)
+    
+    fig.add_tools(HoverTool(
+        names=['stations'],
+        tooltips=[
+            ("station", "@station"),
+            ("line", "@lijn @modality")
+        ]
+    ))
+
+
     return fig
 
 def draw_polygon(fig, building, fire):
     """"Draws all polygons given in the dataset and makes them clickable"""
-    print(building)
 
     # load data about buildings
     fields = ['pand_id', 'wgs', 'full_adress']
@@ -177,9 +200,10 @@ def draw_polygon(fig, building, fire):
 
     # time save use apply function instead of looping 4 seconds just for this part
     # split coordinates to x and y coordinates
+    df["wgs"] = df['wgs'].apply(lambda x:literal_eval(x))
+    
     for i in range(len(df)):
         coords = df.iloc[i]['wgs']
-        coords = literal_eval(coords)
         coords = [TRAN_4326_TO_3857.transform(float(coord[0]), float(coord[1])) for coord in coords]
         x_coords.append([[[c[1] for c in coords]]])
         y_coords.append([[[c[0] for c in coords]]])
@@ -234,10 +258,6 @@ def draw_polygon(fig, building, fire):
     fig.add_tools(HoverTool(
         renderers=[glyph],
         tooltips=
-        # """
-        # adress: <br> @full_adress{safe}
-        # """,
-        
         [
             # use @{ } for field names with spaces
             ( 'adress'          , '@full_adress{safe}'),
