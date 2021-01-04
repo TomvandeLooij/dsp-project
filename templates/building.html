@@ -2,16 +2,48 @@
 
 {% block content %}
 
-<div class="row">
-    <div class="col">    
-        <h3>Your building</h3>
+<div>
+    <div class="row">
+        <div class="col text-center">    
+            <h3>Your building</h3>
+        </div>
     </div>
-</div>
-<div class="row">
-    {{ js_resources|indent(4)|safe }}
-    {{ css_resources|indent(4)|safe }}
-    {{ plot_script|indent(4)|safe }}
-    {{ plot_div|indent(4)|safe }}
+    <div class="row">
+        <div class="col">
+        </div>
+        <div class="col">
+            {{ js_resources|indent(4)|safe }}
+            {{ css_resources|indent(4)|safe }}
+            {{ plot_script|indent(4)|safe }}
+            {{ plot_div|indent(4)|safe }}
+        </div>  
+        <div class="col-2">
+            <a type="button" class="btn btn-primary btn-block {{small_active}}" href={{link_small}}>Small Fire</a>
+            <br>
+            <p><b>Adress(es)</b> <br /> {{adress|safe}}
+            </p>
+            <p> <b>Present in the building: </b> <br />
+                {% for key, value in building_info.items() %}
+                {{value}} {{key}} <br/>
+                {% endfor %}
+            </p>
+        </div>
+        <div class="col-2">
+            <a type="button" class="btn btn-primary btn-block {{big_active}}" href={{link_big}}>Big Fire</a>
+            <br>
+            <p><b>Adjacent buildings:</b><br>
+                {% for key, value in neighbor_info.items() %}
+                {{value}} {{key}} <br/>
+                {% endfor %}
+            </p>
+            <p><b>Buildings in radius excl selected building:</b><br>
+                {% for key, value in radius_info.items() %}
+                {{value}} {{key}} <br/>
+                {% endfor %}
+            </p>
+        </div>
+        <div class="col"></div>
+    </div>
 </div>
 
 {% endblock %}
