@@ -11,7 +11,7 @@ from bokeh.layouts import column
 import pandas as pd
 from ast import literal_eval
 
-from .components import base_map
+from components import base_map
 
 app = Flask(__name__)
 # Configurations
