@@ -106,15 +106,15 @@ def add_public_transport(fig):
     df = pd.read_csv("./data/tram_metro_lijnen.csv")
     df['WKT_LAT_LNG'] = df['WKT_LAT_LNG'].apply(convert)
 
-    for index, row in df.iterrows():
+    for i in range(len(df)):
         coordsx = []
         coordsy = []
-        for coord in row['WKT_LAT_LNG']:
+        for coord in df.iloc[i]['WKT_LAT_LNG']:
             coordsx.append(coord[0])
             coordsy.append(coord[1])
 
-        modaliteit = [row.Modaliteit for item in range(len(coordsx))]
-        lijn = [row.Lijn for item in range(len(coordsx))]
+        modaliteit = [df.iloc[i].Modaliteit for item in range(len(coordsx))]
+        lijn = [df.iloc[i].Lijn for item in range(len(coordsx))]
         
         source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy, "modality":modaliteit, "lijn":lijn})
 
@@ -134,16 +134,16 @@ def add_public_transport(fig):
     df = pd.read_csv('./data/TRAMMETRO_PUNTEN_2020.csv', error_bad_lines=False, encoding="utf-8", delimiter=";")
 
     df['WKT_LAT_LNG'] = df['WKT_LAT_LNG'].apply(lambda x: x.replace("POINT(", "").replace(")", ""))
-    for index, row in df.iterrows():
+    for i in range(len(df)):
         coordsx = []
         coordsy = []
-        coords = row['WKT_LAT_LNG'].split(",")
+        coords = df.iloc[i]['WKT_LAT_LNG'].split(",")
         transformed_coord = TRAN_4326_TO_3857.transform(float(coords[0]), float(coords[1]))
         coordsx.append(transformed_coord[0])
         coordsy.append(transformed_coord[1])
-        modaliteit = [row.Modaliteit]
-        lijn = [row.Lijn]
-        stations = [row.Naam]
+        modaliteit = [df.iloc[i].Modaliteit]
+        lijn = [df.iloc[i].Lijn]
+        stations = [df.iloc[i].Naam]
 
         source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy, "modality":modaliteit, "lijn":lijn, "station":stations})
 
@@ -157,7 +157,6 @@ def add_public_transport(fig):
         ]
     ))
 
-
     return fig
 
 def draw_polygon(fig, building, fire):
@@ -166,7 +165,7 @@ def draw_polygon(fig, building, fire):
     # load data about buildings
     fields = ['pand_id', 'wgs', 'full_adress']
 
-    df = pd.read_csv("./data/final_csv_for_buildings.csv")
+    df = pd.read_csv("./data/city_area_buildings.csv")
 
     # if a building is selected
     if building != "not":
@@ -177,8 +176,8 @@ def draw_polygon(fig, building, fire):
         y_coords = []
 
         # split coordinates to x and y coordinates
-        for index, row in df_building.iterrows():
-            coords = row['wgs']
+        for i in range(len(df_building)):
+            coords = df_building.iloc[i]['wgs']
             coords = literal_eval(coords)
             coords = [TRAN_4326_TO_3857.transform(float(coord[0]), float(coord[1])) for coord in coords]
             x_coords.append([[[c[1] for c in coords]]])
@@ -201,9 +200,10 @@ def draw_polygon(fig, building, fire):
     # time save use apply function instead of looping 4 seconds just for this part
     # split coordinates to x and y coordinates
     df["wgs"] = df['wgs'].apply(lambda x:literal_eval(x))
+    df['full_adress'] = df["full_adress"].apply(str)
     
-    for index, row in df.iterrows():
-        coords = row['wgs']
+    for i in range(len(df)):
+        coords = df.iloc[i]['wgs']
         coords = [TRAN_4326_TO_3857.transform(float(coord[0]), float(coord[1])) for coord in coords]
         x_coords.append([[[c[1] for c in coords]]])
         y_coords.append([[[c[0] for c in coords]]])
@@ -214,6 +214,7 @@ def draw_polygon(fig, building, fire):
     data = {'xs': x_coords, 'ys': y_coords, 'id':list(df["pand_id"]),  'full_adress':list(df['full_adress']), 
             'functions':list(df['gebruiksdoelVerblijfsobject'])}
 
+    # print(data['full_adress'])
     data['full_adress'] = [item.replace("\n", "<br>") for item in data['full_adress']]
     
     # set functions in proper form for hovertool
@@ -272,7 +273,7 @@ def draw_polygon(fig, building, fire):
     return fig
 
 def get_info(building, fire):
-    df = pd.read_csv("./data/final_csv_for_buildings.csv", usecols=["pand_id", "gebruiksdoelVerblijfsobject", "neighbors", "small_linked", "big_linked"])
+    df = pd.read_csv("./data/city_area_buildings.csv", usecols=["pand_id", "gebruiksdoelVerblijfsobject", "neighbors", "linked_small", "linked_big"])
     
     # get all functions from building
     df_building = df[df.pand_id == float(building)]
@@ -286,9 +287,9 @@ def get_info(building, fire):
 
     # get linking for big or small fire
     if fire == "small":
-        column = "small_linked"
+        column = "linked_small"
     elif fire == "big":
-        column = "big_linked"
+        column = "linked_big"
 
     linked_buildings = list(df[df.pand_id.isin(literal_eval(df_building[column].values[0]))].gebruiksdoelVerblijfsobject)
     linked_functions = [item for lijst in linked_buildings for item in literal_eval(lijst)]

@@ -40,7 +40,7 @@ def home():
 
 @app.route('/building/<pand_id>/<fire>', methods=(['GET']))
 def get_information(pand_id, fire):
-    df       = pd.read_csv('./data/final_csv_for_buildings.csv')
+    df       = pd.read_csv('./data/city_area_buildings.csv')
 
     building    = df[df['pand_id'] == float(pand_id)]
     coordinates = literal_eval(building.iloc[0]['wgs'])
