@@ -21,6 +21,7 @@ ALOWED_CORS_DOMAIN = 'http://localhost:8080'
 def home():
     fig = base_map.create_base_map()
     fig = base_map.add_public_transport(fig)
+    fig = base_map.add_emergency_routes(fig)
     fig = base_map.draw_polygon(fig)
 
     # grab the static resources
@@ -47,6 +48,7 @@ def get_information(pand_id):
 
     fig = base_map.create_zoomed_map(coordinates)
     fig = base_map.add_public_transport(fig)
+    fig = base_map.add_emergency_routes(fig)
     fig = base_map.draw_polygon(fig)
     fig = base_map.draw_building_radius(fig, building)
 

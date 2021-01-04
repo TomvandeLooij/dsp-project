@@ -6,6 +6,7 @@ from bokeh.plotting import figure
 from bokeh.tile_providers import get_provider, Vendors
 from bokeh.models.callbacks import CustomJS
 from bokeh.models import ColumnDataSource, TapTool, CustomJS
+from bokeh.palettes import Category20
 
 from ast import literal_eval
 
@@ -105,7 +106,7 @@ def add_public_transport(fig):
         # list with y-coordinates
         lijsty = []
 
-        for j in range(0, len(coords), 1):
+        for j in range(0, len(coords)):
             lijstx.append(coords[j][0])
             lijsty.append(coords[j][1])
 
@@ -131,6 +132,27 @@ def add_public_transport(fig):
         else:
             fig.line(lijstx, lijsty, line_color="green", line_width=2, alpha=0.8)
     return fig
+
+def add_emergency_routes(fig):
+    df = pd.read_csv('./data/emergency_routes.csv')
+    df['WKT_LAT_LNG'] = df['WKT_LAT_LNG'].apply(convert)
+
+    for index, row in df.iterrows():
+        coords = df.iloc[index]['WKT_LAT_LNG']
+        
+         # list with x-coordinates
+        lijstx = []
+        # list with y-coordinates
+        lijsty = []
+
+        for j in range(0, len(coords), 1):
+            lijstx.append(coords[j][0])
+            lijsty.append(coords[j][1])
+
+        fig.line(lijstx, lijsty, line_color='red', line_width = 2)
+
+    return fig
+
 
 def draw_polygon(fig):
     """"Draws all polygons given in the dataset and makes them clickable"""
