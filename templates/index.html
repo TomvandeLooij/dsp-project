@@ -3,16 +3,22 @@
 
 {% block content %}
 
-<div class="row">
-    <div class="col">    
-        <h3>Infrastructural effect of fires in Amsterdam</h3>
+<div class="container-md">
+    <div class="row">
+        <div class="col text-center">    
+            <h3>Infrastructural effect of fires in Amsterdam</h3>
+        </div>
     </div>
-</div>
-<div class="row">
-    {{ js_resources|indent(4)|safe }}
-    {{ css_resources|indent(4)|safe }}
-    {{ plot_script|indent(4)|safe }}
-    {{ plot_div|indent(4)|safe }}
+    <div class="row">
+        <div class="col"></div>
+        <div class="col border">
+            {{ js_resources|indent(4)|safe }}
+            {{ css_resources|indent(4)|safe }}
+            {{ plot_script|indent(4)|safe }}
+            {{ plot_div|indent(4)|safe }}
+        </div>
+        <div class="col"></div>
+    </div>
 </div>
 
 {% endblock %}

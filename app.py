@@ -21,8 +21,9 @@ ALOWED_CORS_DOMAIN = 'http://localhost:8080'
 def home():
     fig = base_map.create_base_map()
     fig = base_map.add_public_transport(fig)
+    fig = base_map.draw_polygon(fig, "not", "not")
     fig = base_map.add_emergency_routes(fig)
-    fig = base_map.draw_polygon(fig)
+
 
     # grab the static resources
     js_resources = INLINE.render_js()
@@ -39,28 +40,52 @@ def home():
         css_resources=css_resources
         )
 
-@app.route('/building/<pand_id>', methods=(['GET']))
-def get_information(pand_id):
-    df       = pd.read_csv('./data/test.csv')
+@app.route('/building/<pand_id>/<fire>', methods=(['GET']))
+def get_information(pand_id, fire):
+    df       = pd.read_csv('./data/final_csv_for_buildings.csv')
 
     building    = df[df['pand_id'] == float(pand_id)]
-    coordinates = literal_eval(building.iloc[0]['WGS'])
+    coordinates = literal_eval(building.iloc[0]['wgs'])
 
+    # plot figure
     fig = base_map.create_zoomed_map(coordinates)
     fig = base_map.add_public_transport(fig)
+    fig = base_map.draw_polygon(fig, float(pand_id), fire)
+    fig = base_map.draw_building_radius(fig, building, fire)
     fig = base_map.add_emergency_routes(fig)
-    fig = base_map.draw_polygon(fig)
-    fig = base_map.draw_building_radius(fig, building)
+
 
     # grab the static resources
     js_resources = INLINE.render_js()
     css_resources = INLINE.render_css()
 
-    # # render template
+    # render template
     script, div = components(fig)
+
+    # get information to show on html
+    building_functions, neighbor_functions, radius_info = base_map.get_info(pand_id, fire)
+
+    link_small = ("http://127.0.0.1:5000/building/" + pand_id + "/small")
+    link_big = ("http://127.0.0.1:5000/building/" + pand_id + "/big")
+    
+    if fire == "small":
+        small_active = "active"
+        big_active = str()
+    else:
+        big_active = "active"
+        small_active = str()
 
     return render_template(
         'building.html',
+        id=str(pand_id),
+        link_small = link_small,
+        link_big = link_big,
+        small_active = small_active,
+        big_active = big_active,
+        adress = str(building['full_adress'].values[0].replace("\n", "<br>")),
+        building_info = building_functions,
+        neighbor_info = neighbor_functions,
+        radius_info = radius_info,
         plot_script=script,
         plot_div=div,
         js_resources=js_resources,
