@@ -20,8 +20,8 @@ ALOWED_CORS_DOMAIN = 'http://localhost:8080'
 @app.route('/', methods=(['GET']))
 def home():
     fig = base_map.create_base_map()
-    fig = base_map.add_public_transport(fig)
-    fig = base_map.draw_polygon(fig, "not", "not")
+    # fig = base_map.add_public_transport(fig)
+    # fig = base_map.draw_polygon(fig, "not", "not")
 
     # grab the static resources
     js_resources = INLINE.render_js()
