@@ -106,15 +106,15 @@ def add_public_transport(fig):
     df = pd.read_csv("./data/tram_metro_lijnen.csv")
     df['WKT_LAT_LNG'] = df['WKT_LAT_LNG'].apply(convert)
 
-    for i in range(len(df)):
+    for index, row in df.iterrows():
         coordsx = []
         coordsy = []
-        for coord in df.iloc[i]['WKT_LAT_LNG']:
+        for coord in row['WKT_LAT_LNG']:
             coordsx.append(coord[0])
             coordsy.append(coord[1])
 
-        modaliteit = [df.iloc[i].Modaliteit for item in range(len(coordsx))]
-        lijn = [df.iloc[i].Lijn for item in range(len(coordsx))]
+        modaliteit = [row.Modaliteit for item in range(len(coordsx))]
+        lijn = [row.Lijn for item in range(len(coordsx))]
         
         source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy, "modality":modaliteit, "lijn":lijn})
 
@@ -134,16 +134,16 @@ def add_public_transport(fig):
     df = pd.read_csv('./data/TRAMMETRO_PUNTEN_2020.csv', error_bad_lines=False, encoding="utf-8", delimiter=";")
 
     df['WKT_LAT_LNG'] = df['WKT_LAT_LNG'].apply(lambda x: x.replace("POINT(", "").replace(")", ""))
-    for i in range(len(df)):
+    for index, row in df.iterrows():
         coordsx = []
         coordsy = []
-        coords = df.iloc[i]['WKT_LAT_LNG'].split(",")
+        coords = row['WKT_LAT_LNG'].split(",")
         transformed_coord = TRAN_4326_TO_3857.transform(float(coords[0]), float(coords[1]))
         coordsx.append(transformed_coord[0])
         coordsy.append(transformed_coord[1])
-        modaliteit = [df.iloc[i].Modaliteit]
-        lijn = [df.iloc[i].Lijn]
-        stations = [df.iloc[i].Naam]
+        modaliteit = [row.Modaliteit]
+        lijn = [row.Lijn]
+        stations = [row.Naam]
 
         source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy, "modality":modaliteit, "lijn":lijn, "station":stations})
 
@@ -177,8 +177,8 @@ def draw_polygon(fig, building, fire):
         y_coords = []
 
         # split coordinates to x and y coordinates
-        for i in range(len(df_building)):
-            coords = df_building.iloc[i]['wgs']
+        for index, row in df_building.iterrows():
+            coords = row['wgs']
             coords = literal_eval(coords)
             coords = [TRAN_4326_TO_3857.transform(float(coord[0]), float(coord[1])) for coord in coords]
             x_coords.append([[[c[1] for c in coords]]])
@@ -202,8 +202,8 @@ def draw_polygon(fig, building, fire):
     # split coordinates to x and y coordinates
     df["wgs"] = df['wgs'].apply(lambda x:literal_eval(x))
     
-    for i in range(len(df)):
-        coords = df.iloc[i]['wgs']
+    for index, row in df.iterrows():
+        coords = row['wgs']
         coords = [TRAN_4326_TO_3857.transform(float(coord[0]), float(coord[1])) for coord in coords]
         x_coords.append([[[c[1] for c in coords]]])
         y_coords.append([[[c[0] for c in coords]]])
