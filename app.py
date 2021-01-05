@@ -10,6 +10,7 @@ from bokeh.layouts import column
 
 import pandas as pd
 from ast import literal_eval
+import time
 
 from .components import base_map
 
@@ -47,9 +48,11 @@ def get_information(pand_id, fire):
 
     # plot figure
     fig = base_map.create_zoomed_map(coordinates)
+
     fig = base_map.add_public_transport(fig)
     fig = base_map.draw_polygon(fig, float(pand_id), fire)
     fig = base_map.draw_building_radius(fig, building, fire)
+    fig, stations = base_map.draw_blocked_ov(building, fig, fire)
 
     # grab the static resources
     js_resources = INLINE.render_js()
@@ -88,6 +91,7 @@ def get_information(pand_id, fire):
         neighbor_info = neighbor_functions,
         radius_info = radius_info,
         risk_score = risk_score,
+        stations = stations,
         plot_script=script,
         plot_div=div,
         js_resources=js_resources,

@@ -106,20 +106,20 @@ def add_public_transport(fig):
     df = pd.read_csv("./data/tram_metro_lijnen.csv")
     df['WKT_LAT_LNG'] = df['WKT_LAT_LNG'].apply(convert)
 
-    for i in range(len(df)):
+    for i in df.itertuples():
         coordsx = []
         coordsy = []
-        for coord in df.iloc[i]['WKT_LAT_LNG']:
+        for coord in i.WKT_LAT_LNG:
             coordsx.append(coord[0])
             coordsy.append(coord[1])
 
-        modaliteit = [df.iloc[i].Modaliteit for item in range(len(coordsx))]
-        lijn = [df.iloc[i].Lijn for item in range(len(coordsx))]
+        modaliteit = [i.Modaliteit] * len(coordsx)
+        lijn = [i.Lijn] * len(coordsx)
         
         source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy, "modality":modaliteit, "lijn":lijn})
 
         if modaliteit[0] == "Tram":
-            fig.line("coordsx", "coordsy", line_color="coral", line_width=2.5, alpha=0.8, name="ov", source=source, legend_label="Tram")
+            fig.line("coordsx", "coordsy", line_color="blue", line_width=2.5, alpha=0.8, name="ov", source=source, legend_label="Tram")
         elif modaliteit[0] == "Metro":
             fig.line("coordsx", "coordsy", line_color="green", line_width=2.5, alpha=0.8, name="ov", source=source, legend_label="Metro")
 
@@ -134,16 +134,15 @@ def add_public_transport(fig):
     df = pd.read_csv('./data/TRAMMETRO_PUNTEN_2020.csv', error_bad_lines=False, encoding="utf-8", delimiter=";")
 
     df['WKT_LAT_LNG'] = df['WKT_LAT_LNG'].apply(lambda x: x.replace("POINT(", "").replace(")", ""))
-    for i in range(len(df)):
-        coordsx = []
-        coordsy = []
-        coords = df.iloc[i]['WKT_LAT_LNG'].split(",")
+    
+    for i in df.itertuples():
+        coords = i.WKT_LAT_LNG.split(",")
         transformed_coord = TRAN_4326_TO_3857.transform(float(coords[0]), float(coords[1]))
-        coordsx.append(transformed_coord[0])
-        coordsy.append(transformed_coord[1])
-        modaliteit = [df.iloc[i].Modaliteit]
-        lijn = [df.iloc[i].Lijn]
-        stations = [df.iloc[i].Naam]
+        coordsx = [transformed_coord[0]]
+        coordsy = [transformed_coord[1]]
+        modaliteit = [i.Modaliteit]
+        lijn = [i.Lijn]
+        stations = [i.Naam]
 
         source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy, "modality":modaliteit, "lijn":lijn, "station":stations})
 
@@ -194,22 +193,16 @@ def draw_polygon(fig, building, fire):
     x_coords = []
     y_coords = []
 
-    start = time.time()
-    print("time elapsed:", end="")
-
     # time save use apply function instead of looping 4 seconds just for this part
     # split coordinates to x and y coordinates
     df["wgs"] = df['wgs'].apply(lambda x:literal_eval(x))
     df['full_adress'] = df["full_adress"].apply(str)
     
-    for i in range(len(df)):
-        coords = df.iloc[i]['wgs']
+    for i in df.itertuples():
+        coords = i.wgs
         coords = [TRAN_4326_TO_3857.transform(float(coord[0]), float(coord[1])) for coord in coords]
         x_coords.append([[[c[1] for c in coords]]])
         y_coords.append([[[c[0] for c in coords]]])
-    
-    end = time.time()
-    print(end - start)
 
     data = {'xs': x_coords, 'ys': y_coords, 'id':list(df["pand_id"]),  'full_adress':list(df['full_adress']), 
             'functions':list(df['gebruiksdoelVerblijfsobject'])}
@@ -337,6 +330,69 @@ def draw_heatmap(fig, fire):
     ))
 
     return fig
+
+def draw_blocked_ov(building, fig, fire):
+    ov = pd.read_csv("./data/tram en metro lijnen plus stations.csv")
+
+    # to show everyting red there are missing pieces in some lines...
+    # ov["lijn_coordinaten"] = ov.lijn_coordinaten.apply(convert)
+
+    # for i in ov.itertuples():
+    #     coordsx = []
+    #     coordsy = []
+    #     for coord in i.lijn_coordinaten:
+    #         coordsx.append(coord[0])
+    #         coordsy.append(coord[1])
+
+    #     fig.line(coordsx, coordsy, color="red")
+
+    if fire == "big":
+        numbers = building.ov_big.values[0]
+        if numbers == "[]":
+            return fig
+        
+        df = ov[ov.number.isin(literal_eval(numbers))]
+        print(df)
+    elif fire == "small":
+        numbers = building.ov_small.values[0]
+        if numbers == "[]":
+            return fig
+        
+        df = ov[ov.number.isin(literal_eval(numbers))]
+        print(df)
+
+    df['lijn_coordinaten'] = df.lijn_coordinaten.apply(convert)
+    
+    blokkage = {}
+
+    for i in df.itertuples():
+        coordsx = []
+        coordsy = []
+        for coord in i.lijn_coordinaten:
+            coordsx.append(coord[0])
+            coordsy.append(coord[1])
+        
+        fig.line(coordsx, coordsy, line_color="red", line_width=2.5, alpha=1)
+
+        # station 1
+        coords = i.coords_s1.split(" ")
+        transformed_coords = TRAN_4326_TO_3857.transform(float(coords[0]), float(coords[1]))
+
+        fig.circle(transformed_coords[0], transformed_coords[1], color="red", size=6)
+
+        # station 2
+        coords = i.coords_s2.split(" ")
+        transformed_coords = TRAN_4326_TO_3857.transform(float(coords[0]), float(coords[1]))
+
+        fig.circle(transformed_coords[0], transformed_coords[1], color="red", size=6)
+
+        # give stations back
+        stations = str(i.station1) + " - " + str(i.station2)
+
+        # give lines back
+        blokkage[stations] = str(i.modaliteit) + " " + str(i.lijn)
+
+    return fig, blokkage
 
 def get_info(building, fire):
     df = pd.read_csv("./data/city_area_buildings.csv", usecols=["pand_id", "gebruiksdoelVerblijfsobject", "neighbors", "linked_small", "linked_big"])
