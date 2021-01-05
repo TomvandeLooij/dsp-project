@@ -119,7 +119,7 @@ def add_public_transport(fig):
         source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy, "modality":modaliteit, "lijn":lijn})
 
         if modaliteit[0] == "Tram":
-            fig.line("coordsx", "coordsy", line_color="blue", line_width=2.5, alpha=0.8, name="ov", source=source, legend_label="Tram")
+            fig.line("coordsx", "coordsy", line_color="coral", line_width=2.5, alpha=0.8, name="ov", source=source, legend_label="Tram")
         elif modaliteit[0] == "Metro":
             fig.line("coordsx", "coordsy", line_color="green", line_width=2.5, alpha=0.8, name="ov", source=source, legend_label="Metro")
 
@@ -268,6 +268,72 @@ def draw_polygon(fig, building, fire):
             'full_adress'    : 'printf',
             'functions'      : 'printf'
         }
+    ))
+
+    return fig
+
+def draw_heatmap(fig, fire):
+    """"Draws all polygons given in the dataset and makes them clickable"""
+
+    # load data about buildings
+    fields = ['pand_id', 'wgs', 'full_adress']
+
+    df = pd.read_csv("./data/city_area_buildings.csv")
+    risk_scores = pd.read_csv('./data/risk_scores.csv')
+
+    x_coords = []
+    y_coords = []
+
+    # time save use apply function instead of looping 4 seconds just for this part
+    # split coordinates to x and y coordinates
+    df["wgs"] = df['wgs'].apply(lambda x:literal_eval(x))
+    
+    for i in range(len(df)):
+        coords = df.iloc[i]['wgs']
+        coords = [TRAN_4326_TO_3857.transform(float(coord[0]), float(coord[1])) for coord in coords]
+        x_coords.append([[[c[1] for c in coords]]])
+        y_coords.append([[[c[0] for c in coords]]])
+
+    if fire == 'small':
+        scores            = risk_scores['risk_score_small']
+        scores_normalized = risk_scores['small_normalized']
+    else:
+        scores            = risk_scores['risk_score_big']
+        scores_normalized = risk_scores['big_normalized']
+
+    data = {'xs': x_coords, 'ys': y_coords, 'id':list(df["pand_id"]), 'alpha': list(scores_normalized + 0.1), 'score':list(scores)}
+
+    # set source for polygons
+    s1 = ColumnDataSource(data=data)
+
+    # all buildings to be plotted on map
+    glyph = fig.multi_polygons(xs='ys', ys='xs', color="red", name="pand", source = s1, alpha='alpha')
+    
+    # what happens in the call
+    call = CustomJS(args=dict(source=s1, fire=fire), code="""
+            /* console.log(cb_data.source.selected.indices[0]); */
+
+            let idx = cb_data.source.selected.indices[0];
+            let pand_id = source.data.id[idx];
+            console.log(pand_id);
+
+            /* here comes ajax callback, default fire size is small*/
+            if (fire == "not") {
+                window.location = ("http://127.0.0.1:5000/building/" + pand_id + "/small")
+            } else {
+                window.location = ("http://127.0.0.1:5000/building/" + pand_id + "/" + fire)
+            }
+            """)
+
+    # only make polygons clickable
+    tap = TapTool(renderers=[glyph], callback=call)
+    fig.add_tools(tap)
+
+    fig.add_tools(HoverTool(
+        renderers=[glyph],
+        tooltips=[
+            ("score", "@score")
+        ]
     ))
 
     return fig

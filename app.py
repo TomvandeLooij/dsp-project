@@ -63,13 +63,18 @@ def get_information(pand_id, fire):
 
     link_small = ("http://127.0.0.1:5000/building/" + pand_id + "/small")
     link_big = ("http://127.0.0.1:5000/building/" + pand_id + "/big")
+
+    risk_scores = pd.read_csv('./data/risk_scores.csv')
     
     if fire == "small":
         small_active = "active"
         big_active = str()
+        risk_score = risk_scores[risk_scores['pand_id'] == float(pand_id)]['risk_score_small'].values[0]
     else:
         big_active = "active"
         small_active = str()
+        risk_score = risk_scores[risk_scores['pand_id'] == float(pand_id)]['risk_score_big'].values[0]
+
 
     return render_template(
         'building.html',
@@ -82,6 +87,7 @@ def get_information(pand_id, fire):
         building_info = building_functions,
         neighbor_info = neighbor_functions,
         radius_info = radius_info,
+        risk_score = risk_score,
         plot_script=script,
         plot_div=div,
         js_resources=js_resources,
@@ -100,6 +106,31 @@ def export():
         css_resources = css_resources,
         plot_script = None
     )
+
+@app.route('/heatmap/<fire>', methods=(['GET']))
+def heatmap(fire):
+    fig = base_map.create_base_map()
+    fig = base_map.draw_heatmap(fig, fire)
+
+    # grab the static resources
+    js_resources = INLINE.render_js()
+    css_resources = INLINE.render_css()
+
+    # # render template
+    script, div = components(fig)
+
+    link_small = ("http://127.0.0.1:5000/heatmap/small")
+    link_big = ("http://127.0.0.1:5000/heatmap/big")
+
+    return render_template(
+        'heatmap.html',
+        plot_script=script,
+        plot_div=div,
+        link_small = link_small,
+        link_big = link_big,
+        js_resources=js_resources,
+        css_resources=css_resources
+        )
 
 
 def add_cors_headers(response):
