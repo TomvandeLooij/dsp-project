@@ -189,7 +189,7 @@ def draw_polygon(fig, building, fire):
         s2 = ColumnDataSource(data=data)
 
         # # all buildings to be plotted on map
-        glyph_2 = fig.multi_polygons(xs='ys', ys='xs', color="red", name="pand", source=s2, alpha=1)
+        glyph_2 = fig.multi_polygons(xs='ys', ys='xs', color="red", name="pand", source=s2, alpha=0.5)
 
     x_coords = []
     y_coords = []
