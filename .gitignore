@@ -129,6 +129,3 @@ dmypy.json
 .pyre/
 
 .notebooks/
-
-# data file that is to big
-city_area_buildings.csv
