@@ -226,7 +226,7 @@ def draw_polygon(fig, building, fire):
     s1 = ColumnDataSource(data=data)
 
     # all buildings to be plotted on map
-    glyph = fig.multi_polygons(xs='ys', ys='xs', color="navy", name="pand", source=s1, alpha=0.3)
+    glyph = fig.multi_polygons(xs='ys', ys='xs', color="#ffba93", name="pand", source=s1, alpha=0.3)
 
     # what happens in the call
     call = CustomJS(args=dict(source=s1, fire=fire), code="""
@@ -349,14 +349,14 @@ def draw_blocked_ov(building, fig, fire):
     if fire == "big":
         numbers = building.ov_big.values[0]
         if numbers == "[]":
-            return fig
+            return fig, {"stations":"stations"}
         
         df = ov[ov.number.isin(literal_eval(numbers))]
         print(df)
     elif fire == "small":
         numbers = building.ov_small.values[0]
         if numbers == "[]":
-            return fig
+            return fig, {"stations":"stations"}
         
         df = ov[ov.number.isin(literal_eval(numbers))]
         print(df)
@@ -391,7 +391,7 @@ def draw_blocked_ov(building, fig, fire):
 
         # give lines back
         blokkage[stations] = str(i.modaliteit) + " " + str(i.lijn)
-
+    # blokkage = {"something":"something"}
     return fig, blokkage
 
 def get_info(building, fire):
