@@ -64,8 +64,8 @@ def get_information(pand_id, fire):
     # get information to show on html
     building_functions, neighbor_functions, radius_info = base_map.get_info(pand_id, fire)
 
-    link_small = ("http://127.0.0.1:5000/building/" + pand_id + "/small")
-    link_big = ("http://127.0.0.1:5000/building/" + pand_id + "/big")
+    link_small = ("/building/" + pand_id + "/small")
+    link_big = ("/building/" + pand_id + "/big")
 
     risk_scores = pd.read_csv('./data/risk_scores.csv')
     
@@ -123,8 +123,8 @@ def heatmap(fire):
     # # render template
     script, div = components(fig)
 
-    link_small = ("http://127.0.0.1:5000/heatmap/small")
-    link_big = ("http://127.0.0.1:5000/heatmap/big")
+    link_small = ("/heatmap/small")
+    link_big = ("/heatmap/big")
 
     return render_template(
         'heatmap.html',
