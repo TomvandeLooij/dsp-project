@@ -334,64 +334,65 @@ def draw_blocked_ov(building, fig, fire):
     ov = pd.read_csv("./data/tram en metro lijnen plus stations.csv")
 
     # to show everyting red there are missing pieces in some lines...
-    ov["lijn_coordinaten"] = ov.lijn_coordinaten.apply(convert)
+    # ov["lijn_coordinaten"] = ov.lijn_coordinaten.apply(convert)
 
-    for i in ov.itertuples():
-        coordsx = []
-        coordsy = []
-        for coord in i.lijn_coordinaten:
-            coordsx.append(coord[0])
-            coordsy.append(coord[1])
-
-        fig.line(coordsx, coordsy, color="red")
-    
-    blokkage = {"No blokked public transport.":""}
-
-    # if fire == "big":
-    #     numbers = building.ov_big.values[0]
-    #     if numbers == "[]":
-    #         return fig, {"No blokked public transport.":""}
-        
-    #     df = ov[ov.number.isin(literal_eval(numbers))]
-    #     print(df)
-    # elif fire == "small":
-    #     numbers = building.ov_small.values[0]
-    #     if numbers == "[]":
-    #         return fig, {"No blokked public transport.":""}
-        
-    #     df = ov[ov.number.isin(literal_eval(numbers))]
-    #     print(df)
-
-    # df['lijn_coordinaten'] = df.lijn_coordinaten.apply(convert)
-    
-    # blokkage = {}
-
-    # for i in df.itertuples():
+    # for i in ov.itertuples():
     #     coordsx = []
     #     coordsy = []
     #     for coord in i.lijn_coordinaten:
     #         coordsx.append(coord[0])
     #         coordsy.append(coord[1])
+
+    #     fig.line(coordsx, coordsy, color="red")
+    
+    # blokkage = {"No blokked public transport.":""}
+
+    if fire == "big":
+        numbers = building.ov_big.values[0]
+        if numbers == "[]":
+            return fig, {"No blokked public transport.":""}
         
-    #     fig.line(coordsx, coordsy, line_color="red", line_width=2.5, alpha=1)
+        df = ov[ov.number.isin(literal_eval(numbers))]
+        print(df)
+    elif fire == "small":
+        numbers = building.ov_small.values[0]
+        if numbers == "[]":
+            return fig, {"No blokked public transport.":""}
+        
+        df = ov[ov.number.isin(literal_eval(numbers))]
+        print(df)
 
-    #     # station 1
-    #     coords = i.coords_s1.split(" ")
-    #     transformed_coords = TRAN_4326_TO_3857.transform(float(coords[0]), float(coords[1]))
+    df['lijn_coordinaten'] = df.lijn_coordinaten.apply(convert)
+    
+    blokkage = {}
 
-    #     fig.circle(transformed_coords[0], transformed_coords[1], color="red", size=6)
+    for i in df.itertuples():
+        coordsx = []
+        coordsy = []
+        for coord in i.lijn_coordinaten:
+            coordsx.append(coord[0])
+            coordsy.append(coord[1])
+        
+        fig.line(coordsx, coordsy, line_color="red", line_width=2.5, alpha=1)
 
-    #     # station 2
-    #     coords = i.coords_s2.split(" ")
-    #     transformed_coords = TRAN_4326_TO_3857.transform(float(coords[0]), float(coords[1]))
+        # station 1
+        coords = i.coords_s1.split(" ")
+        transformed_coords = TRAN_4326_TO_3857.transform(float(coords[0]), float(coords[1]))
 
-    #     fig.circle(transformed_coords[0], transformed_coords[1], color="red", size=6)
+        fig.circle(transformed_coords[0], transformed_coords[1], color="red", size=6)
 
-    #     # give stations back
-    #     stations = str(i.station1) + " - " + str(i.station2)
+        # station 2
+        coords = i.coords_s2.split(" ")
+        transformed_coords = TRAN_4326_TO_3857.transform(float(coords[0]), float(coords[1]))
 
-    #     # give lines back
-    #     blokkage[stations] = str(i.modaliteit) + " " + str(i.lijn)
+        fig.circle(transformed_coords[0], transformed_coords[1], color="red", size=6)
+
+        # give stations back
+        stations = str(i.station1) + " - " + str(i.station2)
+
+        # give lines back
+        blokkage[stations] = str(i.modaliteit) + " " + str(i.lijn)
+        
     return fig, blokkage
 
 def get_info(building, fire):
