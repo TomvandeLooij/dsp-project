@@ -12,7 +12,7 @@ import pandas as pd
 from ast import literal_eval
 import time
 
-from .components import base_map
+from components import base_map
 
 app = Flask(__name__)
 # Configurations
