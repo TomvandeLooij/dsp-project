@@ -148,7 +148,7 @@ def add_cors_headers(response):
     return response
 
 
-app.after_request(add_cors_headers)
+# app.after_request(add_cors_headers)
 
 if __name__ == '__main__':
     app.run()
