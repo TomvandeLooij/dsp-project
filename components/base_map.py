@@ -81,6 +81,26 @@ def draw_building_radius(fig, building, fire):
     # draw radius on map
     fig.patch(y_coords_scaled, x_coords_scaled, line_width=5, alpha = 0.2, color="red")
 
+    # draw blocked roads
+    df = pd.read_csv('./data/roads_in_radius.csv')
+
+    roads = df[df['pand_id'] == float(building['pand_id'])]['road_ids']
+
+    for coords in literal_eval(roads.values[0]):
+        coordsx = []
+        coordsy = []
+
+        for coord in coords:
+            transformed_coord = TRAN_4326_TO_3857.transform(float(coord[0]), float(coord[1]))
+
+            coordsx.append(transformed_coord[0])
+            coordsy.append(transformed_coord[1])
+
+        source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy})
+
+
+        fig.line("coordsx", "coordsy", line_color="black", source = source, line_width=2.5, alpha=0.8, legend_label = 'Blocked Roads')
+
     return fig
 
 
@@ -349,17 +369,17 @@ def draw_blocked_ov(building, fig, fire):
     if fire == "big":
         numbers = building.ov_big.values[0]
         if numbers == "[]":
-            return fig
+            return fig, {'station':'station'}
         
         df = ov[ov.number.isin(literal_eval(numbers))]
-        print(df)
+        # print(df)
     elif fire == "small":
         numbers = building.ov_small.values[0]
         if numbers == "[]":
-            return fig
+            return fig, {'station':'station'}
         
         df = ov[ov.number.isin(literal_eval(numbers))]
-        print(df)
+        # print(df)
 
     df['lijn_coordinaten'] = df.lijn_coordinaten.apply(convert)
     
