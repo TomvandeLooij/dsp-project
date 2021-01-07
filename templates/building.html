@@ -30,9 +30,13 @@
             <p><b class="h6">Risk score:</b>
             <br>
                 {{ risk_score }} 
-                <button type="button" class="btn btn-secondary rounded-circle small" data-toggle="tooltip" data-placement="right" title="Tooltip on right">
+                <!-- <span class="label label-primary mytooltip"><i class="fa fa-question"></i></span> -->
+                <!-- <button type="button" class="btn btn-secondary rounded-circle" data-toggle="tooltip" data-placement="right" title="Tooltip on right">
                     ?
-                </button>
+                </button> -->
+                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="Disabled tooltip">
+                    <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>?</button>
+                </span>
             </p>
         </div>
         <div class="col-2 small">
