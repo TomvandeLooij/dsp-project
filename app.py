@@ -11,6 +11,7 @@ from bokeh.layouts import column
 import pandas as pd
 from ast import literal_eval
 import time
+import numpy as np
 
 from .components import base_map
 
@@ -48,7 +49,6 @@ def get_information(pand_id, fire):
 
     # plot figure
     fig = base_map.create_zoomed_map(coordinates)
-
     fig = base_map.add_public_transport(fig)
     fig = base_map.draw_polygon(fig, float(pand_id), fire)
     fig = base_map.draw_building_radius(fig, building, fire)
@@ -78,6 +78,12 @@ def get_information(pand_id, fire):
         small_active = str()
         risk_score = risk_scores[risk_scores['pand_id'] == float(pand_id)]['risk_score_big'].values[0]
 
+    building_address = building['full_adress'].values[0]
+    if pd.isnull(building_address):
+        print("this building has no adress")
+        address = "Address unkown"
+    else:
+        address = str(building_address.replace("\n", "<br>"))
 
     return render_template(
         'building.html',
@@ -86,7 +92,7 @@ def get_information(pand_id, fire):
         link_big = link_big,
         small_active = small_active,
         big_active = big_active,
-        adress = str(building['full_adress'].values[0].replace("\n", "<br>")),
+        adress = address,
         building_info = building_functions,
         neighbor_info = neighbor_functions,
         radius_info = radius_info,
@@ -126,10 +132,19 @@ def heatmap(fire):
     link_small = ("http://127.0.0.1:5000/heatmap/small")
     link_big = ("http://127.0.0.1:5000/heatmap/big")
 
+    if fire == "small":
+        small_active = "active"
+        big_active = str()
+    else:
+        big_active = "active"
+        small_active = str()
+
     return render_template(
         'heatmap.html',
         plot_script=script,
         plot_div=div,
+        small_active = small_active,
+        big_active = big_active,
         link_small = link_small,
         link_big = link_big,
         js_resources=js_resources,

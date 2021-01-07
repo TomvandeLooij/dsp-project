@@ -23,7 +23,7 @@ def create_base_map():
     tile_provider = get_provider(Vendors.CARTODBPOSITRON_RETINA)
 
     fig = figure(x_range=(530683.95, 555576.10), y_range=(6854570.54, 6876203.35),
-                 x_axis_type="mercator", y_axis_type="mercator", plot_width=900, plot_height=600,
+                 x_axis_type="mercator", y_axis_type="mercator", plot_width=900, plot_height=550,
                  tools="pan,wheel_zoom,reset", active_scroll='wheel_zoom')
 
     fig.add_tile(tile_provider)
@@ -45,7 +45,7 @@ def create_zoomed_map(coordinates):
     tile_provider = get_provider(Vendors.CARTODBPOSITRON_RETINA)
 
     fig = figure(x_range=x_range, y_range=y_range,
-                 x_axis_type="mercator", y_axis_type="mercator", plot_width=900, plot_height=600,
+                 x_axis_type="mercator", y_axis_type="mercator", plot_width=900, plot_height=550,
                  tools="pan,wheel_zoom,reset", active_scroll='wheel_zoom')
 
     fig.add_tile(tile_provider)
@@ -226,7 +226,7 @@ def draw_polygon(fig, building, fire):
     s1 = ColumnDataSource(data=data)
 
     # all buildings to be plotted on map
-    glyph = fig.multi_polygons(xs='ys', ys='xs', color="#ffba93", name="pand", source=s1, alpha=0.3)
+    glyph = fig.multi_polygons(xs='ys', ys='xs', color="peru", name="pand", source=s1, alpha=0.3)
 
     # what happens in the call
     call = CustomJS(args=dict(source=s1, fire=fire), code="""
@@ -335,63 +335,63 @@ def draw_blocked_ov(building, fig, fire):
     ov = pd.read_csv("./data/tram en metro lijnen plus stations.csv")
 
     # to show everyting red there are missing pieces in some lines...
-    # ov["lijn_coordinaten"] = ov.lijn_coordinaten.apply(convert)
+    ov["lijn_coordinaten"] = ov.lijn_coordinaten.apply(convert)
 
-    # for i in ov.itertuples():
-    #     coordsx = []
-    #     coordsy = []
-    #     for coord in i.lijn_coordinaten:
-    #         coordsx.append(coord[0])
-    #         coordsy.append(coord[1])
-
-    #     fig.line(coordsx, coordsy, color="red")
-
-    if fire == "big":
-        numbers = building.ov_big.values[0]
-        if numbers == "[]":
-            return fig, {"stations":"stations"}
-        
-        df = ov[ov.number.isin(literal_eval(numbers))]
-        print(df)
-    elif fire == "small":
-        numbers = building.ov_small.values[0]
-        if numbers == "[]":
-            return fig, {"stations":"stations"}
-        
-        df = ov[ov.number.isin(literal_eval(numbers))]
-        print(df)
-
-    df['lijn_coordinaten'] = df.lijn_coordinaten.apply(convert)
-    
-    blokkage = {}
-
-    for i in df.itertuples():
+    for i in ov.itertuples():
         coordsx = []
         coordsy = []
         for coord in i.lijn_coordinaten:
             coordsx.append(coord[0])
             coordsy.append(coord[1])
+
+        fig.line(coordsx, coordsy, color="red")
+
+    # if fire == "big":
+    #     numbers = building.ov_big.values[0]
+    #     if numbers == "[]":
+    #         return fig, {"No blokked public transport.":""}
         
-        fig.line(coordsx, coordsy, line_color="red", line_width=2.5, alpha=1)
+    #     df = ov[ov.number.isin(literal_eval(numbers))]
+    #     print(df)
+    # elif fire == "small":
+    #     numbers = building.ov_small.values[0]
+    #     if numbers == "[]":
+    #         return fig, {"No blokked public transport.":""}
+        
+    #     df = ov[ov.number.isin(literal_eval(numbers))]
+    #     print(df)
 
-        # station 1
-        coords = i.coords_s1.split(" ")
-        transformed_coords = TRAN_4326_TO_3857.transform(float(coords[0]), float(coords[1]))
+    # df['lijn_coordinaten'] = df.lijn_coordinaten.apply(convert)
+    
+    # blokkage = {}
 
-        fig.circle(transformed_coords[0], transformed_coords[1], color="red", size=6)
+    # for i in df.itertuples():
+    #     coordsx = []
+    #     coordsy = []
+    #     for coord in i.lijn_coordinaten:
+    #         coordsx.append(coord[0])
+    #         coordsy.append(coord[1])
+        
+    #     fig.line(coordsx, coordsy, line_color="red", line_width=2.5, alpha=1)
 
-        # station 2
-        coords = i.coords_s2.split(" ")
-        transformed_coords = TRAN_4326_TO_3857.transform(float(coords[0]), float(coords[1]))
+    #     # station 1
+    #     coords = i.coords_s1.split(" ")
+    #     transformed_coords = TRAN_4326_TO_3857.transform(float(coords[0]), float(coords[1]))
 
-        fig.circle(transformed_coords[0], transformed_coords[1], color="red", size=6)
+    #     fig.circle(transformed_coords[0], transformed_coords[1], color="red", size=6)
 
-        # give stations back
-        stations = str(i.station1) + " - " + str(i.station2)
+    #     # station 2
+    #     coords = i.coords_s2.split(" ")
+    #     transformed_coords = TRAN_4326_TO_3857.transform(float(coords[0]), float(coords[1]))
 
-        # give lines back
-        blokkage[stations] = str(i.modaliteit) + " " + str(i.lijn)
-    # blokkage = {"something":"something"}
+    #     fig.circle(transformed_coords[0], transformed_coords[1], color="red", size=6)
+
+    #     # give stations back
+    #     stations = str(i.station1) + " - " + str(i.station2)
+
+    #     # give lines back
+    #     blokkage[stations] = str(i.modaliteit) + " " + str(i.lijn)
+    blokkage = {"No blokked public transport.":""}
     return fig, blokkage
 
 def get_info(building, fire):
