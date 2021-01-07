@@ -332,9 +332,9 @@ def draw_heatmap(fig, fire):
 
             /* here comes ajax callback, default fire size is small*/
             if (fire == "not") {
-                window.location = ("http://127.0.0.1:5000/building/" + pand_id + "/small")
+                window.location = ("/building/" + pand_id + "/small")
             } else {
-                window.location = ("http://127.0.0.1:5000/building/" + pand_id + "/" + fire)
+                window.location = ("/building/" + pand_id + "/" + fire)
             }
             """)
 
