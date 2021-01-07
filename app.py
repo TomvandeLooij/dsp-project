@@ -21,9 +21,14 @@ ALOWED_CORS_DOMAIN = 'http://localhost:8080'
 
 @app.route('/', methods=(['GET']))
 def home():
+    # plot figure
     fig = base_map.create_base_map()
     fig = base_map.add_public_transport(fig)
     fig = base_map.draw_polygon(fig, "not", "not")
+
+    # remove logo and toolbar
+    fig.toolbar.logo = None
+    fig.toolbar_location = None
 
     # grab the static resources
     js_resources = INLINE.render_js()
@@ -54,6 +59,10 @@ def get_information(pand_id, fire):
     fig = base_map.draw_building_radius(fig, building, fire)
     fig, stations = base_map.draw_blocked_ov(building, fig, fire)
 
+    # remove logo and toolbar
+    fig.toolbar.logo = None
+    fig.toolbar_location = None
+
     # grab the static resources
     js_resources = INLINE.render_js()
     css_resources = INLINE.render_css()
@@ -64,20 +73,28 @@ def get_information(pand_id, fire):
     # get information to show on html
     building_functions, neighbor_functions, radius_info = base_map.get_info(pand_id, fire)
 
+    # get links to show big or little fire
     link_small = ("http://127.0.0.1:5000/building/" + pand_id + "/small")
     link_big = ("http://127.0.0.1:5000/building/" + pand_id + "/big")
 
+    # load risk scores
     risk_scores = pd.read_csv('./data/risk_scores.csv')
     
+    # 
     if fire == "small":
+        # UI
         small_active = "active"
         big_active = str()
+        # score
         risk_score = risk_scores[risk_scores['pand_id'] == float(pand_id)]['risk_score_small'].values[0]
     else:
+        # UI
         big_active = "active"
         small_active = str()
+        # score
         risk_score = risk_scores[risk_scores['pand_id'] == float(pand_id)]['risk_score_big'].values[0]
 
+    # give the full address of the building back
     building_address = building['full_adress'].values[0]
     if pd.isnull(building_address):
         print("this building has no adress")
@@ -85,6 +102,7 @@ def get_information(pand_id, fire):
     else:
         address = str(building_address.replace("\n", "<br>"))
 
+    # return html template and contents
     return render_template(
         'building.html',
         id=str(pand_id),
@@ -119,8 +137,13 @@ def export():
 
 @app.route('/heatmap/<fire>', methods=(['GET']))
 def heatmap(fire):
+    # plot figure
     fig = base_map.create_base_map()
     fig = base_map.draw_heatmap(fig, fire)
+    
+    # remove logo and toolbar
+    fig.toolbar.logo = None
+    fig.toolbar_location = None
 
     # grab the static resources
     js_resources = INLINE.render_js()

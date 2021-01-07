@@ -86,7 +86,6 @@ def draw_building_radius(fig, building, fire):
 
 def convert(test):
     """Convert string of coordinates to list of list (inner list is xy coordinates) and transforms them"""
-
     test = test.replace('"', '')
     test2 = test.split(',')
 
@@ -345,6 +344,8 @@ def draw_blocked_ov(building, fig, fire):
             coordsy.append(coord[1])
 
         fig.line(coordsx, coordsy, color="red")
+    
+    blokkage = {"No blokked public transport.":""}
 
     # if fire == "big":
     #     numbers = building.ov_big.values[0]
@@ -391,7 +392,6 @@ def draw_blocked_ov(building, fig, fire):
 
     #     # give lines back
     #     blokkage[stations] = str(i.modaliteit) + " " + str(i.lijn)
-    blokkage = {"No blokked public transport.":""}
     return fig, blokkage
 
 def get_info(building, fire):
