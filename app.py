@@ -71,7 +71,7 @@ def get_information(pand_id, fire):
     script, div = components(fig)
 
     # get information to show on html
-    building_functions, neighbor_functions, radius_info = base_map.get_info(pand_id, fire)
+    building_functions, neighbor_functions, radius_info, amount_neighbors, amount_radius, complete_adress = base_map.get_info(pand_id, fire)
 
     # get links to show big or little fire
     link_small = ("http://127.0.0.1:5000/building/" + pand_id + "/small")
@@ -114,6 +114,9 @@ def get_information(pand_id, fire):
         building_info = building_functions,
         neighbor_info = neighbor_functions,
         radius_info = radius_info,
+        amount_adjacent = amount_neighbors,
+        amount_radius = amount_radius,
+        radius_adress=complete_adress,
         risk_score = risk_score,
         stations = stations,
         plot_script=script,

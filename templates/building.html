@@ -36,12 +36,12 @@
             </p>
         </div>
         <div class="col-2 small">
-            <p><b class="h6">Adjacent buildings:</b><br>
+            <p><b class="h6">{{amount_adjacent}} adjacent buildings with functions:</b><br>
                 {% for key, value in neighbor_info.items() %}
                 {{value}} {{key}} <br/>
                 {% endfor %}
             </p>
-            <p><b class="h6">Buildings in radius excl selected building:</b><br>
+            <p><b class="h6">{{amount_radius}} buildings in radius excl selected building with functions:</b><br>
                 {% for key, value in radius_info.items() %}
                 {{value}} {{key}} <br/>
                 {% endfor %}
@@ -51,6 +51,9 @@
                 {{key}} <br/>
                 {{value}} <br/>
                 {% endfor %}
+            </p>
+            <p><b class="h6">Addresses of buildings in radius excl selected buildign</b> <br>
+                {{radius_adress|safe}}
             </p>
         </div>
         <div class="col"></div>

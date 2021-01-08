@@ -402,7 +402,7 @@ def draw_blocked_ov(building, fig, fire):
     return fig, blokkage
 
 def get_info(building, fire):
-    df = pd.read_csv("./data/city_area_buildings.csv", usecols=["pand_id", "gebruiksdoelVerblijfsobject", "neighbors", "linked_small", "linked_big"])
+    df = pd.read_csv("./data/city_area_buildings.csv", usecols=["pand_id", "gebruiksdoelVerblijfsobject", "neighbors", "linked_small", "linked_big", "full_adress"])
     
     # get all functions from building
     df_building = df[df.pand_id == float(building)]
@@ -420,8 +420,30 @@ def get_info(building, fire):
     elif fire == "big":
         column = "linked_big"
 
-    linked_buildings = list(df[df.pand_id.isin(literal_eval(df_building[column].values[0]))].gebruiksdoelVerblijfsobject)
+    df_linked = df[df.pand_id.isin(literal_eval(df_building[column].values[0]))] 
+    linked_buildings = list(df_linked.gebruiksdoelVerblijfsobject)
     linked_functions = [item for lijst in linked_buildings for item in literal_eval(lijst)]
     linked_functions = Counter(linked_functions)
+    
+    # get number of buildings in jeopardy
+    amount_neighbors = len(literal_eval(df_building.neighbors.values[0]))
+    amount_radius = len(literal_eval(df_building[column].values[0]))
 
-    return dict(functions), dict(neighbor_functions), dict(linked_functions)
+    # get all adresses of buildings in jeopardy
+    count_unkown = df_linked.full_adress.isnull().values.ravel().sum()
+    all_adresses = list(df_linked.loc[df_linked['full_adress'].notnull(), 'full_adress'].values)
+    print(all_adresses)
+
+    complete_adress = str()
+    for adress in all_adresses:
+        if "All in Amsterdam" in adress:
+            adress = adress.replace("All in Amsterdam", "")
+            complete_adress += adress
+        else:
+            adress = adress.replace("\n", " ").replace(" Amsterdam", "\n")
+            complete_adress += adress
+    complete_adress = complete_adress + "All in Amsterdam"
+    complete_adress = complete_adress.replace("\n", "<br>")
+    print(complete_adress)
+
+    return dict(functions), dict(neighbor_functions), dict(linked_functions), amount_neighbors, amount_radius, complete_adress
