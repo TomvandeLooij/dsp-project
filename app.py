@@ -124,17 +124,10 @@ def get_information(pand_id, fire):
         css_resources=css_resources
     )
 
-@app.route('/export', methods=(['GET']))
-def export():
-    # grab the static resources
-    js_resources = INLINE.render_js()
-    css_resources = INLINE.render_css()
-
+@app.route('/FAQ', methods=(['GET']))
+def FAQ():
     return render_template(
-        'export.html',
-        js_resources = js_resources,
-        css_resources = css_resources,
-        plot_script = None
+        'export.html'
     )
 
 @app.route('/heatmap/<fire>', methods=(['GET']))
