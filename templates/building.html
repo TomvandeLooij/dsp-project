@@ -12,10 +12,21 @@
         <div class="col">
         </div>
         <div class="col">
-            {{ js_resources|indent(4)|safe }}
-            {{ css_resources|indent(4)|safe }}
-            {{ plot_script|indent(4)|safe }}
-            {{ plot_div|indent(4)|safe }}
+            <div class="row">
+                {{ js_resources|indent(4)|safe }}
+                {{ css_resources|indent(4)|safe }}
+                {{ plot_script|indent(4)|safe }}
+                {{ plot_div|indent(4)|safe }}
+            </div>
+            <div class="row">
+                <div class="col">
+                    <a type="button" class="btn btn-primary btn-block {{small_active}}" href={{link_small}}>Small Fire</a>
+                </div>
+                <div class="col">
+                    <a type="button" class="btn btn-primary btn-block {{big_active}}" href={{link_big}}>Big Fire</a>
+                </div>
+                
+            </div>
         </div>  
         <div class="col-2 small">
             <!-- <a type="button" class="btn btn-primary btn-block {{small_active}}" href={{link_small}}>Small Fire</a> -->
@@ -58,16 +69,16 @@
         </div>
         <div class="col"></div>
     </div>
-    <div class = "row" style = 'padding-top: 10px'>
+    <!-- <div class = "row" style = 'padding-top: 10px'>
         <div class = "col-1"></div>
         <div class="col">
-            <a type="button" class="btn btn-primary btn-block {{small_active}}" href={{link_small}}>Small Fire</a>
+            
         </div>
         <div class="col">
-            <a type="button" class="btn btn-primary btn-block {{big_active}}" href={{link_big}}>Big Fire</a>
+            
         </div>
         <div class="col-5"></div>
-    </div>
+    </div> -->
 </div>
 
 {% endblock %}
