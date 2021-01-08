@@ -73,9 +73,8 @@ def get_information(pand_id, fire):
     # get information to show on html
     building_functions, neighbor_functions, radius_info, amount_neighbors, amount_radius, complete_adress = base_map.get_info(pand_id, fire)
 
-    # get links to show big or little fire
-    link_small = ("http://127.0.0.1:5000/building/" + pand_id + "/small")
-    link_big = ("http://127.0.0.1:5000/building/" + pand_id + "/big")
+    link_small = ("/building/" + pand_id + "/small")
+    link_big = ("/building/" + pand_id + "/big")
 
     # load risk scores
     risk_scores = pd.read_csv('./data/risk_scores.csv')
@@ -155,8 +154,8 @@ def heatmap(fire):
     # # render template
     script, div = components(fig)
 
-    link_small = ("http://127.0.0.1:5000/heatmap/small")
-    link_big = ("http://127.0.0.1:5000/heatmap/big")
+    link_small = ("/heatmap/small")
+    link_big = ("/heatmap/big")
 
     if fire == "small":
         small_active = "active"
@@ -189,7 +188,7 @@ def add_cors_headers(response):
     return response
 
 
-app.after_request(add_cors_headers)
+# app.after_request(add_cors_headers)
 
 if __name__ == '__main__':
     app.run()
