@@ -316,7 +316,7 @@ def draw_heatmap(fig, fire):
 
     data = {'xs': x_coords, 'ys': y_coords, 'id':list(df["pand_id"]), 'score':list(scores_normalized)}
 
-    exp_cmap = LinearColorMapper(palette="Viridis256", 
+    exp_cmap = LinearColorMapper(palette="Magma256", 
                              low = min(scores_normalized), 
                              high = max(scores_normalized))
 
