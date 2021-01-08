@@ -453,7 +453,6 @@ def get_info(building, fire):
     # get all adresses of buildings in jeopardy
     count_unkown = df_linked.full_adress.isnull().values.ravel().sum()
     all_adresses = list(df_linked.loc[df_linked['full_adress'].notnull(), 'full_adress'].values)
-    print(all_adresses)
 
     complete_adress = str()
     for adress in all_adresses:
@@ -464,7 +463,8 @@ def get_info(building, fire):
             adress = adress.replace("\n", " ").replace(" Amsterdam", "\n")
             complete_adress += adress
     complete_adress = complete_adress + "All in Amsterdam"
+    if count_unkown > 0:
+        complete_adress += "\n" + str(count_unkown) + " unkown adresses"
     complete_adress = complete_adress.replace("\n", "<br>")
-    print(complete_adress)
 
     return dict(functions), dict(neighbor_functions), dict(linked_functions), amount_neighbors, amount_radius, complete_adress
