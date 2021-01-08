@@ -54,12 +54,16 @@ def create_zoomed_map(coordinates):
 
 def draw_building_radius(fig, building, fire):
     """Draws a radius around a building to show blockage by the fire department"""
-    
+    df = pd.read_csv('./data/roads_in_radius.csv')
+
     # radius in meters/kilometers based on fire size
     if fire == "small":
         radius = 10/100000
+        roads = df[df['pand_id'] == float(building['pand_id'])]['road_ids_small']
+
     elif fire == "big":
         radius = 25/100000
+        roads = df[df['pand_id'] == float(building['pand_id'])]['road_ids_big']
 
     # get coordintes and transforms them to be usable for the map
     coordinates = literal_eval(building.iloc[0]['wgs'])
@@ -80,6 +84,23 @@ def draw_building_radius(fig, building, fire):
 
     # draw radius on map
     fig.patch(y_coords_scaled, x_coords_scaled, line_width=5, alpha = 0.2, color="red")
+
+    # draw blocked roads
+
+    for coords in literal_eval(roads.values[0]):
+        coordsx = []
+        coordsy = []
+
+        for coord in coords:
+            transformed_coord = TRAN_4326_TO_3857.transform(float(coord[0]), float(coord[1]))
+
+            coordsx.append(transformed_coord[0])
+            coordsy.append(transformed_coord[1])
+
+        source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy})
+
+
+        fig.line("coordsx", "coordsy", line_color="black", source = source, line_width=2.5, alpha=0.8, legend_label = 'Blocked Roads')
 
     return fig
 
@@ -237,9 +258,9 @@ def draw_polygon(fig, building, fire):
 
             /* here comes ajax callback, default fire size is small*/
             if (fire == "not") {
-                window.location = ("http://127.0.0.1:5000/building/" + pand_id + "/small")
+                window.location = ("/building/" + pand_id + "/small")
             } else {
-                window.location = ("http://127.0.0.1:5000/building/" + pand_id + "/" + fire)
+                window.location = ("/building/" + pand_id + "/" + fire)
             }
             """)
 
@@ -315,9 +336,9 @@ def draw_heatmap(fig, fire):
 
             /* here comes ajax callback, default fire size is small*/
             if (fire == "not") {
-                window.location = ("http://127.0.0.1:5000/building/" + pand_id + "/small")
+                window.location = ("/building/" + pand_id + "/small")
             } else {
-                window.location = ("http://127.0.0.1:5000/building/" + pand_id + "/" + fire)
+                window.location = ("/building/" + pand_id + "/" + fire)
             }
             """)
 
