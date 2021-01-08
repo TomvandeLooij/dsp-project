@@ -5,7 +5,7 @@ import pyclipper
 from bokeh.plotting import figure, show
 from bokeh.tile_providers import get_provider, Vendors
 from bokeh.models.callbacks import CustomJS
-from bokeh.models import ColumnDataSource, TapTool, CustomJS, HoverTool, Line, MultiLine
+from bokeh.models import ColumnDataSource, TapTool, CustomJS, HoverTool, Line, MultiLine, LinearColorMapper, BasicTicker, ColorBar
 
 from pyproj import Transformer, transform
 from ast import literal_eval
@@ -23,7 +23,7 @@ def create_base_map():
     tile_provider = get_provider(Vendors.CARTODBPOSITRON_RETINA)
 
     fig = figure(x_range=(530683.95, 555576.10), y_range=(6854570.54, 6876203.35),
-                 x_axis_type="mercator", y_axis_type="mercator", plot_width=900, plot_height=600,
+                 x_axis_type="mercator", y_axis_type="mercator", plot_width=900, plot_height=550,
                  tools="pan,wheel_zoom,reset", active_scroll='wheel_zoom')
 
     fig.add_tile(tile_provider)
@@ -45,7 +45,7 @@ def create_zoomed_map(coordinates):
     tile_provider = get_provider(Vendors.CARTODBPOSITRON_RETINA)
 
     fig = figure(x_range=x_range, y_range=y_range,
-                 x_axis_type="mercator", y_axis_type="mercator", plot_width=900, plot_height=600,
+                 x_axis_type="mercator", y_axis_type="mercator", plot_width=900, plot_height=550,
                  tools="pan,wheel_zoom,reset", active_scroll='wheel_zoom')
 
     fig.add_tile(tile_provider)
@@ -107,7 +107,6 @@ def draw_building_radius(fig, building, fire):
 
 def convert(test):
     """Convert string of coordinates to list of list (inner list is xy coordinates) and transforms them"""
-
     test = test.replace('"', '')
     test2 = test.split(',')
 
@@ -247,7 +246,7 @@ def draw_polygon(fig, building, fire):
     s1 = ColumnDataSource(data=data)
 
     # all buildings to be plotted on map
-    glyph = fig.multi_polygons(xs='ys', ys='xs', color="navy", name="pand", source=s1, alpha=0.3)
+    glyph = fig.multi_polygons(xs='ys', ys='xs', color="peru", name="pand", source=s1, alpha=0.3)
 
     # what happens in the call
     call = CustomJS(args=dict(source=s1, fire=fire), code="""
@@ -315,13 +314,17 @@ def draw_heatmap(fig, fire):
         scores            = risk_scores['risk_score_big']
         scores_normalized = risk_scores['big_normalized']
 
-    data = {'xs': x_coords, 'ys': y_coords, 'id':list(df["pand_id"]), 'alpha': list(scores_normalized + 0.1), 'score':list(scores)}
+    data = {'xs': x_coords, 'ys': y_coords, 'id':list(df["pand_id"]), 'score':list(scores_normalized)}
+
+    exp_cmap = LinearColorMapper(palette="Viridis256", 
+                             low = min(scores_normalized), 
+                             high = max(scores_normalized))
 
     # set source for polygons
     s1 = ColumnDataSource(data=data)
 
     # all buildings to be plotted on map
-    glyph = fig.multi_polygons(xs='ys', ys='xs', color="red", name="pand", source = s1, alpha='alpha')
+    glyph = fig.multi_polygons(xs='ys', ys='xs', color={"field":"score", "transform":exp_cmap}, name="pand", source = s1, alpha=0.8)
     
     # what happens in the call
     call = CustomJS(args=dict(source=s1, fire=fire), code="""
@@ -346,9 +349,12 @@ def draw_heatmap(fig, fire):
     fig.add_tools(HoverTool(
         renderers=[glyph],
         tooltips=[
-            ("score", "@score")
+            ("score", "@score{%0.2f}")
         ]
     ))
+
+    bar = ColorBar(color_mapper=exp_cmap, location=(0,0))
+    fig.add_layout(bar, "right")
 
     return fig
 
@@ -366,21 +372,22 @@ def draw_blocked_ov(building, fig, fire):
     #         coordsy.append(coord[1])
 
     #     fig.line(coordsx, coordsy, color="red")
+    
+    # blokkage = {"No blokked public transport.":""}
 
     if fire == "big":
         numbers = building.ov_big.values[0]
         if numbers == "[]":
-            return fig, {'station':'station'}
+            return fig, {"No blokked public transport.":""}
         
         df = ov[ov.number.isin(literal_eval(numbers))]
-        # print(df)
+
     elif fire == "small":
         numbers = building.ov_small.values[0]
         if numbers == "[]":
-            return fig, {'station':'station'}
+            return fig, {"No blokked public transport.":""}
         
         df = ov[ov.number.isin(literal_eval(numbers))]
-        # print(df)
 
     df['lijn_coordinaten'] = df.lijn_coordinaten.apply(convert)
     

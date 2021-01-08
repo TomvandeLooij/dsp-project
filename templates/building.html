@@ -17,36 +17,36 @@
             {{ plot_script|indent(4)|safe }}
             {{ plot_div|indent(4)|safe }}
         </div>  
-        <div class="col-2">
-            <a type="button" class="btn btn-primary btn-block {{small_active}}" href={{link_small}}>Small Fire</a>
-            <br>
-            <p><b>Adress(es)</b> <br /> {{adress|safe}}
+        <div class="col-2 small">
+            <!-- <a type="button" class="btn btn-primary btn-block {{small_active}}" href={{link_small}}>Small Fire</a> -->
+            <!-- <br> -->
+            <p><b class="h6">Address(es)</b> <br /> {{adress|safe}}
             </p>
-            <p> <b>Present in the building: </b> <br />
+            <p><b class="h6">Present in the building: </b> <br />
                 {% for key, value in building_info.items() %}
                 {{value}} {{key}} <br/>
                 {% endfor %}
             </p>
+            <p><b class="h6">Risk score:</b>
             <br>
-            <p><b>Risk score:</b>
-            <br>
-                {{ risk_score }}
+                {{ risk_score }} 
+                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="Score is based on weighted score of factors, for more information see FAQ.">
+                    <button class="btn btn-dark btn-sm" style="pointer-events: none;" type="button" disabled>?</button>
+                </span>
             </p>
         </div>
-        <div class="col-2">
-            <a type="button" class="btn btn-primary btn-block {{big_active}}" href={{link_big}}>Big Fire</a>
-            <br>
-            <p><b>Adjacent buildings:</b><br>
+        <div class="col-2 small">
+            <p><b class="h6">Adjacent buildings:</b><br>
                 {% for key, value in neighbor_info.items() %}
                 {{value}} {{key}} <br/>
                 {% endfor %}
             </p>
-            <p><b>Buildings in radius excl selected building:</b><br>
+            <p><b class="h6">Buildings in radius excl selected building:</b><br>
                 {% for key, value in radius_info.items() %}
                 {{value}} {{key}} <br/>
                 {% endfor %}
             </p>
-            <p><b>public transport</b><br>
+            <p><b class="h6">Public transport:</b><br>
                 {% for key, value in stations.items() %}
                 {{key}} <br/>
                 {{value}} <br/>
@@ -54,6 +54,16 @@
             </p>
         </div>
         <div class="col"></div>
+    </div>
+    <div class = "row" style = 'padding-top: 10px'>
+        <div class = "col-1"></div>
+        <div class="col">
+            <a type="button" class="btn btn-primary btn-block {{small_active}}" href={{link_small}}>Small Fire</a>
+        </div>
+        <div class="col">
+            <a type="button" class="btn btn-primary btn-block {{big_active}}" href={{link_big}}>Big Fire</a>
+        </div>
+        <div class="col-5"></div>
     </div>
 </div>
 
