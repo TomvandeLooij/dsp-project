@@ -86,7 +86,6 @@ def draw_building_radius(fig, building, fire):
     fig.patch(y_coords_scaled, x_coords_scaled, line_width=5, alpha = 0.2, color="red")
 
     # draw blocked roads
-
     for coords in literal_eval(roads.values[0]):
         coordsx = []
         coordsy = []
@@ -100,7 +99,7 @@ def draw_building_radius(fig, building, fire):
         source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy})
 
 
-        fig.line("coordsx", "coordsy", line_color="black", source = source, line_width=2.5, alpha=0.8, legend_label = 'Blocked Roads')
+        fig.line("coordsx", "coordsy", line_color="black", source = source, line_width=3, alpha=1, legend_label='Blocked roads')
 
     return fig
 
@@ -400,7 +399,7 @@ def draw_blocked_ov(building, fig, fire):
             coordsx.append(coord[0])
             coordsy.append(coord[1])
         
-        fig.line(coordsx, coordsy, line_color="red", line_width=2.5, alpha=1)
+        fig.line(coordsx, coordsy, line_color="red", line_width=2.5, alpha=1, legend_label="Blocked public transport")
 
         # station 1
         coords = i.coords_s1.split(" ")
