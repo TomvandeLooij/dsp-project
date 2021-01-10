@@ -54,16 +54,12 @@ def create_zoomed_map(coordinates):
 
 def draw_building_radius(fig, building, fire):
     """Draws a radius around a building to show blockage by the fire department"""
-    df = pd.read_csv('./data/roads_in_radius.csv')
-
     # radius in meters/kilometers based on fire size
     if fire == "small":
         radius = 10/100000
-        roads = df[df['pand_id'] == float(building['pand_id'])]['road_ids_small']
 
     elif fire == "big":
         radius = 25/100000
-        roads = df[df['pand_id'] == float(building['pand_id'])]['road_ids_big']
 
     # get coordintes and transforms them to be usable for the map
     coordinates = literal_eval(building.iloc[0]['wgs'])
@@ -84,22 +80,6 @@ def draw_building_radius(fig, building, fire):
 
     # draw radius on map
     fig.patch(y_coords_scaled, x_coords_scaled, line_width=5, alpha = 0.2, color="red")
-
-    # draw blocked roads
-    for coords in literal_eval(roads.values[0]):
-        coordsx = []
-        coordsy = []
-
-        for coord in coords:
-            transformed_coord = TRAN_4326_TO_3857.transform(float(coord[0]), float(coord[1]))
-
-            coordsx.append(transformed_coord[0])
-            coordsy.append(transformed_coord[1])
-
-        source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy})
-
-
-        fig.line("coordsx", "coordsy", line_color="black", source = source, line_width=3, alpha=1, legend_label='Blocked roads')
 
     return fig
 
@@ -288,10 +268,10 @@ def draw_heatmap(fig, fire):
     """"Draws all polygons given in the dataset and makes them clickable"""
 
     # load data about buildings
-    fields = ['pand_id', 'wgs', 'full_adress']
+    # fields = ['pand_id', 'wgs', 'full_adress']
 
     df = pd.read_csv("./data/city_area_buildings.csv")
-    risk_scores = pd.read_csv('./data/risk_scores.csv')
+    # risk_scores = pd.read_csv('./data/risk_scores.csv')
 
     x_coords = []
     y_coords = []
@@ -307,23 +287,23 @@ def draw_heatmap(fig, fire):
         y_coords.append([[[c[0] for c in coords]]])
 
     if fire == 'small':
-        scores            = risk_scores['risk_score_small']
-        scores_normalized = risk_scores['small_normalized']
+        scores            = df['score_small_default']
+        scores_normalized = df['norm_score_small_default']
     else:
-        scores            = risk_scores['risk_score_big']
-        scores_normalized = risk_scores['big_normalized']
+        scores            = df['score_big_default']
+        scores_normalized = df['norm_score_big_default']
 
-    data = {'xs': x_coords, 'ys': y_coords, 'id':list(df["pand_id"]), 'score':list(scores_normalized)}
+    data = {'xs': x_coords, 'ys': y_coords, 'id':list(df["pand_id"]), 'scores':list(scores)}
 
     exp_cmap = LinearColorMapper(palette="Magma256", 
-                             low = min(scores_normalized), 
-                             high = max(scores_normalized))
+                             low = min(scores), 
+                             high = max(scores))
 
     # set source for polygons
     s1 = ColumnDataSource(data=data)
 
     # all buildings to be plotted on map
-    glyph = fig.multi_polygons(xs='ys', ys='xs', color={"field":"score", "transform":exp_cmap}, name="pand", source = s1, alpha=0.8)
+    glyph = fig.multi_polygons(xs='ys', ys='xs', color={"field":"scores", "transform":exp_cmap}, name="pand", source = s1, alpha=0.8)
     
     # what happens in the call
     call = CustomJS(args=dict(source=s1, fire=fire), code="""
@@ -348,7 +328,7 @@ def draw_heatmap(fig, fire):
     fig.add_tools(HoverTool(
         renderers=[glyph],
         tooltips=[
-            ("score", "@score{%0.2f}")
+            ("score", "@scores")
         ]
     ))
 
@@ -357,7 +337,7 @@ def draw_heatmap(fig, fire):
 
     return fig
 
-def draw_blocked_ov(building, fig, fire):
+def draw_blocked_ov(fig, building, fire):
     ov = pd.read_csv("./data/tram en metro lijnen plus stations.csv")
 
     # to show everyting red there are missing pieces in some lines...
@@ -420,6 +400,32 @@ def draw_blocked_ov(building, fig, fire):
         blokkage[stations] = str(i.modaliteit) + " " + str(i.lijn)
 
     return fig, blokkage
+
+def draw_blocked_roads(fig, building, fire):
+    df = pd.read_csv("./data/all_roads_amsterdam.csv")
+
+    if fire == "small":
+        road_ids = literal_eval(building.roads_small.values[0])
+    elif fire == "big":
+        road_ids = literal_eval(building.roads_big.values[0])
+
+    print(road_ids)
+    df_roads = df[df.number.isin(road_ids)]
+    df_roads['WKT_LAT_LNG'] = df.WKT_LAT_LNG.apply(convert)
+    print(df_roads)
+
+    for i in df_roads.itertuples():
+        coordsx = []
+        coordsy = []
+        for coord in i.WKT_LAT_LNG:
+            coordsx.append(coord[0])
+            coordsy.append(coord[1])
+
+        source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy})
+
+        fig.line('coordsx', 'coordsy', line_color="black", source=source, line_width=3, alpha=1, legend_label="Blocked roads")
+    
+    return fig
 
 def get_info(building, fire):
     df = pd.read_csv("./data/city_area_buildings.csv", usecols=["pand_id", "gebruiksdoelVerblijfsobject", "neighbors", "linked_small", "linked_big", "full_adress"])

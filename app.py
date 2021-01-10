@@ -57,7 +57,8 @@ def get_information(pand_id, fire):
     fig = base_map.add_public_transport(fig)
     fig = base_map.draw_polygon(fig, float(pand_id), fire)
     fig = base_map.draw_building_radius(fig, building, fire)
-    fig, stations = base_map.draw_blocked_ov(building, fig, fire)
+    fig, stations = base_map.draw_blocked_ov(fig, building, fire)
+    fig = base_map.draw_blocked_roads(fig, building, fire)
 
     # remove logo and toolbar
     fig.toolbar.logo = None
