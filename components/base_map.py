@@ -412,7 +412,6 @@ def draw_blocked_roads(fig, building, fire):
     print(road_ids)
     df_roads = df[df.number.isin(road_ids)]
     df_roads['WKT_LAT_LNG'] = df.WKT_LAT_LNG.apply(convert)
-    print(df_roads)
 
     for i in df_roads.itertuples():
         coordsx = []

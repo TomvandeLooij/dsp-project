@@ -76,23 +76,19 @@ def get_information(pand_id, fire):
 
     link_small = ("/building/" + pand_id + "/small")
     link_big = ("/building/" + pand_id + "/big")
-
-    # load risk scores
-    risk_scores = pd.read_csv('./data/risk_scores.csv')
     
-    # 
     if fire == "small":
         # UI
         small_active = "active"
         big_active = str()
         # score
-        risk_score = risk_scores[risk_scores['pand_id'] == float(pand_id)]['risk_score_small'].values[0]
+        risk_score = building.score_small_default
     else:
         # UI
         big_active = "active"
         small_active = str()
         # score
-        risk_score = risk_scores[risk_scores['pand_id'] == float(pand_id)]['risk_score_big'].values[0]
+        risk_score = building.score_big_default
 
     # give the full address of the building back
     building_address = building['full_adress'].values[0]
