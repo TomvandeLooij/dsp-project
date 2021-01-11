@@ -39,11 +39,13 @@
                 {% endfor %}
             </p>
             <p><b class="h6">Risk score:</b>
-            <br>
-                {{ risk_score }} 
                 <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="Score is based on weighted score of factors, for more information see FAQ.">
                     <button class="btn btn-dark btn-sm" style="pointer-events: none;" type="button" disabled>?</button>
                 </span>
+            <br>
+                Default focus: {{ risk_score_default }} <br>
+                Residential focus: {{ risk_score_residential }}<br>
+                Road focus: {{ risk_score_road }}
             </p>
         </div>
         <div class="col-2 small">

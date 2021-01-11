@@ -85,13 +85,17 @@ def get_information(pand_id, fire):
         small_active = "active"
         big_active = str()
         # score
-        risk_score = building.score_small_default.values[0]
+        risk_score_default = building.score_small_default.values[0]
+        risk_score_residential = building.score_small_residential.values[0]
+        risk_score_road = building.score_small_road.values[0]
     else:
         # UI
         big_active = "active"
         small_active = str()
         # score
-        risk_score = building.score_big_default.values[0]
+        risk_score_default = building.score_big_default.values[0]
+        risk_score_residential = building.score_big_residential.values[0]
+        risk_score_road = building.score_big_road.values[0]
 
     # give the full address of the building back
     building_address = building['full_adress'].values[0]
@@ -118,7 +122,9 @@ def get_information(pand_id, fire):
         amount_adjacent = amount_neighbors,
         amount_radius = amount_radius,
         radius_adress=complete_adress,
-        risk_score = risk_score,
+        risk_score_default = risk_score_default,
+        risk_score_residential = risk_score_residential,
+        risk_score_road = risk_score_road,
         stations = stations,
         plot_script=script,
         plot_div=div,
@@ -166,7 +172,7 @@ def heatmap(fire, score_type):
         default_active = str()
         residential_active = "active"
         something_active = str()
-    elif score_type == "something":
+    elif score_type == "road":
         default_active = str()
         residential_active = str()
         something_active = "active"
@@ -174,9 +180,9 @@ def heatmap(fire, score_type):
     # set links for buttons
     link_default = ("/heatmap/" + fire + "/default")
     link_residential = ("/heatmap/" + fire + "/residential")
-    link_something = ("/heatmap/" + fire + "/something")
-    link_small = ("/heatmap/small" + score_type)
-    link_big = ("/heatmap/big" + score_type)
+    link_something = ("/heatmap/" + fire + "/road")
+    link_small = ("/heatmap/small/" + score_type)
+    link_big = ("/heatmap/big/" + score_type)
 
     return render_template(
         'heatmap.html',

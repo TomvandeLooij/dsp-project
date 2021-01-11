@@ -294,25 +294,33 @@ def draw_heatmap(fig, fire, score_type):
             scores_normalized = df['norm_score_big_default']
         print(score_type)
     elif score_type == 'residential':
-        # if fire == "small":
-        # elif fire == "big":
+        if fire == "small":
+            scores            = df['score_small_residential']
+            scores_normalized = df['norm_score_small_residential']
+        elif fire == "big":
+            scores            = df['score_big_residential']
+            scores_normalized = df['norm_score_big_residential']
         print(score_type)
-    elif score_type == 'something': 
-        # if fire == "small":
-        # elif fire == "big":
+    elif score_type == 'road': 
+        if fire == "small":
+            scores            = df['score_small_road']
+            scores_normalized = df['norm_score_small_road']
+        elif fire == "big":
+            scores            = df['score_big_road']
+            scores_normalized = df['norm_score_big_road']
         print(score_type)
 
-    data = {'xs': x_coords, 'ys': y_coords, 'id':list(df["pand_id"]), 'scores':list(scores)}
+    data = {'xs': x_coords, 'ys': y_coords, 'id':list(df["pand_id"]), 'scores':list(scores), 'norm_scores':list(scores_normalized)}
 
     exp_cmap = LinearColorMapper(palette="Magma256", 
-                             low = min(scores), 
-                             high = max(scores))
+                             low = min(scores_normalized), 
+                             high = max(scores_normalized))
 
     # set source for polygons
     s1 = ColumnDataSource(data=data)
 
     # all buildings to be plotted on map
-    glyph = fig.multi_polygons(xs='ys', ys='xs', color={"field":"scores", "transform":exp_cmap}, name="pand", source = s1, alpha=0.8)
+    glyph = fig.multi_polygons(xs='ys', ys='xs', color={"field":"norm_scores", "transform":exp_cmap}, name="pand", source = s1, alpha=0.8)
     
     # what happens in the call
     call = CustomJS(args=dict(source=s1, fire=fire), code="""
