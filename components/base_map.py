@@ -160,9 +160,6 @@ def add_public_transport(fig):
 def draw_polygon(fig, building, fire):
     """"Draws all polygons given in the dataset and makes them clickable"""
 
-    # load data about buildings
-    fields = ['pand_id', 'wgs', 'full_adress']
-
     df = pd.read_csv("./data/city_area_buildings.csv")
 
     # if a building is selected
@@ -264,19 +261,13 @@ def draw_polygon(fig, building, fire):
 
     return fig
 
-def draw_heatmap(fig, fire):
+def draw_heatmap(fig, fire, score_type):
     """"Draws all polygons given in the dataset and makes them clickable"""
-
-    # load data about buildings
-    # fields = ['pand_id', 'wgs', 'full_adress']
-
     df = pd.read_csv("./data/city_area_buildings.csv")
-    # risk_scores = pd.read_csv('./data/risk_scores.csv')
 
     x_coords = []
     y_coords = []
 
-    # time save use apply function instead of looping 4 seconds just for this part
     # split coordinates to x and y coordinates
     df["wgs"] = df['wgs'].apply(lambda x:literal_eval(x))
     
@@ -286,12 +277,30 @@ def draw_heatmap(fig, fire):
         x_coords.append([[[c[1] for c in coords]]])
         y_coords.append([[[c[0] for c in coords]]])
 
-    if fire == 'small':
-        scores            = df['score_small_default']
-        scores_normalized = df['norm_score_small_default']
-    else:
-        scores            = df['score_big_default']
-        scores_normalized = df['norm_score_big_default']
+    # default scores
+    # if fire == 'small':
+    #     scores            = df['score_small_default']
+    #     scores_normalized = df['norm_score_small_default']
+    # else:
+    #     scores            = df['score_big_default']
+    #     scores_normalized = df['norm_score_big_default']
+
+    if score_type == 'default':
+        if fire == "small":
+            scores            = df['score_small_default']
+            scores_normalized = df['norm_score_small_default']
+        elif fire == "big":
+            scores            = df['score_big_default']
+            scores_normalized = df['norm_score_big_default']
+        print(score_type)
+    elif score_type == 'residential':
+        # if fire == "small":
+        # elif fire == "big":
+        print(score_type)
+    elif score_type == 'something': 
+        # if fire == "small":
+        # elif fire == "big":
+        print(score_type)
 
     data = {'xs': x_coords, 'ys': y_coords, 'id':list(df["pand_id"]), 'scores':list(scores)}
 
