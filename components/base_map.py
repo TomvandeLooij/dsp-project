@@ -359,14 +359,13 @@ def draw_blocked_ov(fig, building, fire):
         if numbers == "[]":
             return fig, {"No blokked public transport.":""}
         
-        df = ov[ov.number.isin(literal_eval(numbers))]
 
     elif fire == "small":
         numbers = building.ov_small.values[0]
         if numbers == "[]":
             return fig, {"No blokked public transport.":""}
         
-        df = ov[ov.number.isin(literal_eval(numbers))]
+    df = ov[ov.number.isin(literal_eval(numbers))]
 
     df['lijn_coordinaten'] = df.lijn_coordinaten.apply(convert)
     
@@ -409,7 +408,9 @@ def draw_blocked_roads(fig, building, fire):
     elif fire == "big":
         road_ids = literal_eval(building.roads_big.values[0])
 
-    print(road_ids)
+    if len(road_ids) == 0:
+        return fig
+
     df_roads = df[df.number.isin(road_ids)]
     df_roads['WKT_LAT_LNG'] = df.WKT_LAT_LNG.apply(convert)
 

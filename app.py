@@ -57,8 +57,11 @@ def get_information(pand_id, fire):
     fig = base_map.add_public_transport(fig)
     fig = base_map.draw_polygon(fig, float(pand_id), fire)
     fig = base_map.draw_building_radius(fig, building, fire)
+    print("done some stuff")
     fig, stations = base_map.draw_blocked_ov(fig, building, fire)
+    print("done with ov")
     fig = base_map.draw_blocked_roads(fig, building, fire)
+    print("done with roads")
 
     # remove logo and toolbar
     fig.toolbar.logo = None
@@ -82,13 +85,13 @@ def get_information(pand_id, fire):
         small_active = "active"
         big_active = str()
         # score
-        risk_score = building.score_small_default
+        risk_score = building.score_small_default.values[0]
     else:
         # UI
         big_active = "active"
         small_active = str()
         # score
-        risk_score = building.score_big_default
+        risk_score = building.score_big_default.values[0]
 
     # give the full address of the building back
     building_address = building['full_adress'].values[0]
@@ -97,6 +100,8 @@ def get_information(pand_id, fire):
         address = "Address unkown"
     else:
         address = str(building_address.replace("\n", "<br>"))
+    
+    print("done with loading building")
 
     # return html template and contents
     return render_template(
