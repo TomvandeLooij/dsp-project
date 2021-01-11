@@ -85,17 +85,17 @@ def get_information(pand_id, fire):
         small_active = "active"
         big_active = str()
         # score
-        risk_score_default = building.score_small_default.values[0]
-        risk_score_residential = building.score_small_residential.values[0]
-        risk_score_road = building.score_small_road.values[0]
+        risk_score_default = round(building.norm_score_small_default.values[0], 2)
+        risk_score_residential = round(building.norm_score_small_residential.values[0], 2)
+        risk_score_road = round(building.norm_score_small_road.values[0], 2)
     else:
         # UI
         big_active = "active"
         small_active = str()
         # score
-        risk_score_default = building.score_big_default.values[0]
-        risk_score_residential = building.score_big_residential.values[0]
-        risk_score_road = building.score_big_road.values[0]
+        risk_score_default = round(building.norm_score_big_default.values[0], 2)
+        risk_score_residential = round(building.norm_score_big_residential.values[0], 2)
+        risk_score_road = round(building.norm_score_big_road.values[0], 2)
 
     # give the full address of the building back
     building_address = building['full_adress'].values[0]

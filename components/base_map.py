@@ -277,14 +277,6 @@ def draw_heatmap(fig, fire, score_type):
         x_coords.append([[[c[1] for c in coords]]])
         y_coords.append([[[c[0] for c in coords]]])
 
-    # default scores
-    # if fire == 'small':
-    #     scores            = df['score_small_default']
-    #     scores_normalized = df['norm_score_small_default']
-    # else:
-    #     scores            = df['score_big_default']
-    #     scores_normalized = df['norm_score_big_default']
-
     if score_type == 'default':
         if fire == "small":
             scores            = df['score_small_default']
@@ -345,7 +337,7 @@ def draw_heatmap(fig, fire, score_type):
     fig.add_tools(HoverTool(
         renderers=[glyph],
         tooltips=[
-            ("score", "@scores")
+            ("score", "@norm_scores{0.2f}")
         ]
     ))
 
@@ -356,20 +348,6 @@ def draw_heatmap(fig, fire, score_type):
 
 def draw_blocked_ov(fig, building, fire):
     ov = pd.read_csv("./data/tram en metro lijnen plus stations.csv")
-
-    # to show everyting red there are missing pieces in some lines...
-    # ov["lijn_coordinaten"] = ov.lijn_coordinaten.apply(convert)
-
-    # for i in ov.itertuples():
-    #     coordsx = []
-    #     coordsy = []
-    #     for coord in i.lijn_coordinaten:
-    #         coordsx.append(coord[0])
-    #         coordsy.append(coord[1])
-
-    #     fig.line(coordsx, coordsy, color="red")
-    
-    # blokkage = {"No blokked public transport.":""}
 
     if fire == "big":
         numbers = building.ov_big.values[0]
