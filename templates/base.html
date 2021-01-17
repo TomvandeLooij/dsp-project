@@ -13,6 +13,7 @@
     <script type="text/javascript">
 
       $(document).ready(function(){
+
           // set setting to the right checked version
           var loc = window.location.href;
           loc = loc.split('/').slice(-3,);
@@ -39,6 +40,7 @@
             $("input[name='fire']").removeAttr("disabled");            
           };
 
+
           // focus is only selectable when show scoring is set to yes
           $("input[name='scoring']").change(function () {
             if($("#heatmap").prop('checked')){
@@ -53,6 +55,7 @@
             };
           });
           
+
           // creates tooltip for question mark about FAQ
           $('[data-toggle="tooltip"]').tooltip({
             trigger: "hover",
@@ -62,7 +65,7 @@
 
       });
 
-      function go_to_url(){
+      function go_to_url () {
         if ($("#map").is(":checked")){
           var url = ''
           url = url.concat(window.location.origin, '/map/0/0');
@@ -75,7 +78,11 @@
           console.log(url)
           window.location.href = url
         };
-      }
+      };
+
+      function change_fire_size () {
+        window.location = $("input[name='fire']:checked").val()
+      };
       
       </script>
     <title>Data System Project</title>
