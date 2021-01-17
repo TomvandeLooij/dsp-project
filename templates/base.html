@@ -13,14 +13,24 @@
     <script type="text/javascript">
 
       $(document).ready(function(){
+          function equals(array1, array2) {
+            for (var i = 0, l=array1.length; i < l; i++) {       
+              if (array1[i] != array2[i]) {
+                  return false;   
+              }           
+            }       
+            return true;
+          };
 
           // set setting to the right checked version
           var loc = window.location.href;
           loc = loc.split('/').slice(-3,);
-          if (loc == ['map', '0', '0']){
+          var default_link = ['map', '0', '0'];
+
+          if (equals(loc, default_link)){
             console.log("nothing to be done");
           }
-          else if (loc[0] == 'building'){
+          else if (loc[0] === 'building'){
             var fire = '#' + loc[2] + "Fire";
             $(fire).attr("checked", true);
           }
@@ -55,7 +65,6 @@
             };
           });
           
-
           // creates tooltip for question mark about FAQ
           $('[data-toggle="tooltip"]').tooltip({
             trigger: "hover",
