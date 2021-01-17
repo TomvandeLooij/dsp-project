@@ -62,7 +62,7 @@
             <br>
             <a type="button" id="urlButton" class="btn btn-primary" href=# onclick="go_to_url()">Apply</a>
         </div>
-        <div class="col-7 border">
+        <div class="col-7 border" id="bokeh">
             {{ js_resources|indent(4)|safe }}
             {{ css_resources|indent(4)|safe }}
             {{ plot_script|indent(4)|safe }}

@@ -79,7 +79,7 @@ def draw_building_radius(fig, building, fire):
     y_coords_scaled = [c[0] for c in scaled_coordinates]
 
     # draw radius on map
-    fig.patch(y_coords_scaled, x_coords_scaled, line_width=5, alpha = 0.2, color="red")
+    fig.patch(y_coords_scaled, x_coords_scaled, line_width=5, alpha = 0.2, color="red", legend="Fire radius")
 
     return fig
 
@@ -111,9 +111,14 @@ def add_public_transport(fig):
         for coord in i.WKT_LAT_LNG:
             coordsx.append(coord[0])
             coordsy.append(coord[1])
+        
+        lijn = i.Lijn.replace(" ", '').split("|")
+        lijn = ", ".join(lijn)
+        k = lijn.rfind(", ")
+        lijn = lijn[:k] + " and" + lijn[k+1:]
 
         modaliteit = [i.Modaliteit] * len(coordsx)
-        lijn = [i.Lijn] * len(coordsx)
+        lijn = [lijn] * len(coordsx)
         
         source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy, "modality":modaliteit, "lijn":lijn})
 
@@ -125,7 +130,7 @@ def add_public_transport(fig):
     fig.add_tools(HoverTool(
         names=['ov'],
         tooltips=[
-            ("line", "@lijn @modality")
+            ("line", "@modality @lijn ")
         ]
     ))
 
@@ -140,7 +145,13 @@ def add_public_transport(fig):
         coordsx = [transformed_coord[0]]
         coordsy = [transformed_coord[1]]
         modaliteit = [i.Modaliteit]
-        lijn = [i.Lijn]
+        
+        lijn = i.Lijn.replace(" ", '').split("|")
+        lijn = ", ".join(lijn)
+        k = lijn.rfind(", ")
+        lijn = lijn[:k] + " and" + lijn[k+1:]
+
+        lijn = [lijn]
         stations = [i.Naam]
 
         source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy, "modality":modaliteit, "lijn":lijn, "station":stations})
@@ -151,7 +162,7 @@ def add_public_transport(fig):
         names=['stations'],
         tooltips=[
             ("station", "@station"),
-            ("line", "@lijn @modality")
+            ("line", "@modality @lijn")
         ]
     ))
 
@@ -253,8 +264,9 @@ def draw_polygon(fig, building, fire):
         tooltips=
         [
             # use @{ } for field names with spaces
-            ( 'adress'          , '@full_adress{safe}'),
-            ( 'functions',          '@functions{safe}')
+            ( 'address'                 , '@full_adress{safe}'),
+            ( 'functions in building'   , '@functions{safe}'),
+            ( "click for more information", "")
         ],
         formatters = {
             'full_adress'    : 'printf',
@@ -273,6 +285,7 @@ def draw_heatmap(fig, fire, score_type):
 
     # split coordinates to x and y coordinates
     df["wgs"] = df['wgs'].apply(lambda x:literal_eval(x))
+    df['full_adress'] = df["full_adress"].apply(str)
     
     for i in range(len(df)):
         coords = df.iloc[i]['wgs']
@@ -305,8 +318,24 @@ def draw_heatmap(fig, fire, score_type):
             scores_normalized = df['norm_score_big_road']
         print(score_type)
 
-    data = {'xs': x_coords, 'ys': y_coords, 'id':list(df["pand_id"]), 'scores':list(scores), 'norm_scores':list(scores_normalized)}
+    data = {'xs': x_coords, 'ys': y_coords, 'id':list(df["pand_id"]), 'scores':list(scores), 'norm_scores':list(scores_normalized), 
+            'full_adress':list(df['full_adress']), 'functions':list(df['gebruiksdoelVerblijfsobject'])}
+    
+    # set full adress in proper form for hovertool
+    data['full_adress'] = [item.replace("\n", "<br>") for item in data['full_adress']]
 
+    # set functions in proper form for hovertool
+    all_functions = []
+    for item in data["functions"]:
+        item = dict(Counter(literal_eval(item)))
+        string = str()
+        for element in item:
+            string = string + str(item[element]) + " " + str(element) + "<br>"
+        all_functions.append(string)
+
+    data['functions'] = all_functions
+
+    # get colors for heatmap
     exp_cmap = LinearColorMapper(palette="Magma256", 
                              low = min(scores_normalized), 
                              high = max(scores_normalized))
@@ -340,7 +369,9 @@ def draw_heatmap(fig, fire, score_type):
     fig.add_tools(HoverTool(
         renderers=[glyph],
         tooltips=[
-            ("score", "@norm_scores{0.2f}")
+            ("score", "@norm_scores{0.2f}"),
+            ("address", "@full_adress{safe}"),
+            ("functions in building", "@functions{safe}")
         ]
     ))
 

@@ -9,7 +9,6 @@
         </div>
     </div>
     <div class="row">
-        <!-- <div class="col border"></div> -->
         <div class="col border px-5">
             <h5>Size of fire</h5>
             <div class="custom-control custom-radio">
@@ -28,20 +27,10 @@
             <a type="button" class="btn btn-primary" href=# onclick="change_fire_size()">Apply</a>
         </div>
         <div class="col border">
-            <!-- <div class="row"> -->
             {{ js_resources|indent(4)|safe }}
             {{ css_resources|indent(4)|safe }}
             {{ plot_script|indent(4)|safe }}
             {{ plot_div|indent(4)|safe }}
-            <!-- </div>
-            <div class="row">
-                <div class="col">
-                    <a type="button" class="btn btn-primary btn-block {{small_active}}" href={{link_small}}>Small Fire</a>
-                </div>
-                <div class="col">
-                    <a type="button" class="btn btn-primary btn-block {{big_active}}" href={{link_big}}>Big Fire</a>
-                </div>
-            </div> -->
         </div>  
         <div class="col-2 small border">
             <p><b class="h6">Address(es)</b> <br /> {{adress|safe}}
@@ -52,8 +41,8 @@
                 {% endfor %}
             </p>
             <p><b class="h6">Risk score:</b>
-                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="Score is based on weighted score of factors, for more information see FAQ.">
-                    <button class="btn btn-dark btn-sm" style="pointer-events: none;" type="button" disabled>?</button>
+                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="Score is based on weighted score of factors, click for more explanation.">
+                    <a href="/FAQ"><button class="btn btn-dark btn-sm" style="pointer-events: none;" type="button" disabled>?</button></a>
                 </span>
             <br>
                 Default focus: {{ risk_score_default }} <br>

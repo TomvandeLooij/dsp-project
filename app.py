@@ -33,6 +33,17 @@ def home(heatmap, fire, focus):
     # remove logo and toolbar
     fig.toolbar.logo = None
     fig.toolbar_location = None
+    
+    callback = CustomJS(args=dict(plot = fig), code="""
+        sessionStorage.setItem('xstart', plot.x_range.start);
+        sessionStorage.setItem('xend', plot.x_range.end);
+        sessionStorage.setItem('ystart', plot.y_range.start);
+        sessionStorage.setItem('yend', plot.y_range.end);
+        console.log(sessionStorage);
+    """)
+
+    fig.x_range.js_on_change('start', callback)
+    fig.y_range.js_on_change('start', callback)
 
     # grab the static resources
     js_resources = INLINE.render_js()
@@ -58,14 +69,11 @@ def get_information(pand_id, fire):
 
     # plot figure
     fig = base_map.create_zoomed_map(coordinates)
+    fig = base_map.draw_building_radius(fig, building, fire)
     fig = base_map.add_public_transport(fig)
     fig = base_map.draw_polygon(fig, float(pand_id), fire)
-    fig = base_map.draw_building_radius(fig, building, fire)
-    print("done some stuff")
     fig, stations = base_map.draw_blocked_ov(fig, building, fire)
-    print("done with ov")
     fig = base_map.draw_blocked_roads(fig, building, fire)
-    print("done with roads")
 
     # remove logo and toolbar
     fig.toolbar.logo = None
