@@ -232,17 +232,18 @@ def draw_polygon(fig, building, fire):
     # what happens in the call
     call = CustomJS(args=dict(source=s1, fire=fire), code="""
             /* console.log(cb_data.source.selected.indices[0]); */
+            console.log(cb_data.source)
 
             let idx = cb_data.source.selected.indices[0];
             let pand_id = source.data.id[idx];
             console.log(pand_id);
 
             /* here comes ajax callback, default fire size is small*/
-            if (fire == "not") {
+            /* if (fire == "not") {
                 window.location = ("/building/" + pand_id + "/small")
             } else {
                 window.location = ("/building/" + pand_id + "/" + fire)
-            }
+            } */
             """)
 
     # only make polygons clickable

@@ -26,6 +26,18 @@ def home():
     fig = base_map.add_public_transport(fig)
     fig = base_map.draw_polygon(fig, "not", "not")
 
+    callback = CustomJS(args=dict(plot = fig), code="""
+    console.log(plot);
+    var xstart = plot.x_range.start;
+    var xend = plot.x_range.end;
+    var ystart = plot.y_range.start;
+    var yend = plot.y_range.end;
+    console.log(xstart, xend);
+    console.log(ystart, yend);
+    """)
+
+    fig.x_range.js_on_change('start', callback)
+
     # remove logo and toolbar
     fig.toolbar.logo = None
     fig.toolbar_location = None
