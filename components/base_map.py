@@ -79,7 +79,7 @@ def draw_building_radius(fig, building, fire):
     y_coords_scaled = [c[0] for c in scaled_coordinates]
 
     # draw radius on map
-    fig.patch(y_coords_scaled, x_coords_scaled, line_width=5, alpha = 0.2, color="red", legend="Fire radius")
+    fig.patch(y_coords_scaled, x_coords_scaled, line_width=5, alpha = 0.2, color="red", legend_label="Fire radius")
 
     return fig
 
@@ -450,9 +450,25 @@ def draw_blocked_roads(fig, building, fire):
             coordsx.append(coord[0])
             coordsy.append(coord[1])
 
-        source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy})
+        names = [i.STT_NAAM] * len(coordsx)
+        if i.AUTO == "calamiteit":
+            types = ["calamiteiten route"] * len(coordsx)
+        elif i.AUTO == "hoofd":
+            types = ["hoofdnet route"] * len(coordsx)
+        elif i.AUTO == "plus":
+            types = ["plusnet route"] * len(coordsx)
 
-        fig.line('coordsx', 'coordsy', line_color="black", source=source, line_width=3, alpha=1, legend_label="Blocked roads")
+        source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy, "name":names, "type":types})
+
+        fig.line('coordsx', 'coordsy', line_color="black", source=source, line_width=3, alpha=1, legend_label="Blocked roads", name="road")
+
+    fig.add_tools(HoverTool(
+        names=['road'],
+        tooltips=[
+            ("Road", "@name"),
+            ("Type", "@type")
+        ]
+    ))
     
     return fig
 
