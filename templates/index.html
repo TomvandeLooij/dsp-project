@@ -3,21 +3,72 @@
 
 {% block content %}
 
-<div class="container-md">
+<div>
     <div class="row">
         <div class="col text-center">    
             <h3>Infrastructural effect of fires in Amsterdam</h3>
         </div>
     </div>
     <div class="row">
-        <div class="col"></div>
-        <div class="col">
+        <div class="col-1 border"></div>
+        <div class="col-2 border">
+            <h5>Show scoring</h5>
+            <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="scoring" id="heatmap" value="heatmap">
+                <label class="custom-control-label" for="heatmap">
+                    Yes
+                </label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="scoring" id="map" value="map" checked>
+                <label class="custom-control-label" for="map">
+                    No
+                </label>
+            </div>
+            <br>
+            <h5>Size of fire</h5>
+            <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="fire" id="smallFire" value="small" disabled checked>
+                <label class="custom-control-label" for="smallFire">
+                  Small fire
+                </label>
+            </div>
+                <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="fire" id="bigFire" value="big" disabled>
+                <label class="custom-control-label" for="bigFire">
+                    Big fire
+                </label>
+            </div>
+            <br>
+            <h5>Focus of scoring</h5>
+            <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="focus" id="default" value="default" disabled checked>
+                <label class="custom-control-label" for="default">
+                    default
+                </label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="focus" id="residential" value="residential" disabled>
+                <label class="custom-control-label" for="residential">
+                    Residential
+                </label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="focus" id="roads" value="roads" disabled>
+                <label class="custom-control-label" for="roads">
+                    Roads
+                </label>
+            </div>
+            <br>
+            <a type="button" class="btn btn-primary" href=# onclick="go_to_url()">Apply</a>
+        </div>
+        <div class="col-7 border">
             {{ js_resources|indent(4)|safe }}
             {{ css_resources|indent(4)|safe }}
             {{ plot_script|indent(4)|safe }}
             {{ plot_div|indent(4)|safe }}
         </div>
-        <div class="col"></div>
+        <div class="col-1 border"></div>
     </div>
 </div>
 

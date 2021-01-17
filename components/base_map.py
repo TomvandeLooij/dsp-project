@@ -23,7 +23,7 @@ def create_base_map():
     tile_provider = get_provider(Vendors.CARTODBPOSITRON_RETINA)
 
     fig = figure(x_range=(530683.95, 555576.10), y_range=(6854570.54, 6876203.35),
-                 x_axis_type="mercator", y_axis_type="mercator", plot_width=900, plot_height=550,
+                 x_axis_type="mercator", y_axis_type="mercator", plot_width=800, plot_height=550,
                  tools="pan,wheel_zoom,reset", active_scroll='wheel_zoom')
 
     fig.add_tile(tile_provider)
@@ -45,7 +45,7 @@ def create_zoomed_map(coordinates):
     tile_provider = get_provider(Vendors.CARTODBPOSITRON_RETINA)
 
     fig = figure(x_range=x_range, y_range=y_range,
-                 x_axis_type="mercator", y_axis_type="mercator", plot_width=900, plot_height=550,
+                 x_axis_type="mercator", y_axis_type="mercator", plot_width=800, plot_height=550,
                  tools="pan,wheel_zoom,reset", active_scroll='wheel_zoom')
 
     fig.add_tile(tile_provider)
@@ -227,18 +227,20 @@ def draw_polygon(fig, building, fire):
     # what happens in the call
     call = CustomJS(args=dict(source=s1, fire=fire), code="""
             /* console.log(cb_data.source.selected.indices[0]); */
-            console.log(cb_data.source)
 
             let idx = cb_data.source.selected.indices[0];
             let pand_id = source.data.id[idx];
             console.log(pand_id);
+            var url = '';
 
             /* here comes ajax callback, default fire size is small*/
-            /* if (fire == "not") {
-                window.location = ("/building/" + pand_id + "/small")
+            if (fire == "not") {
+                url = url.concat(window.location.origin , '/building/', pand_id , '/small')
+                window.location.href = url
             } else {
-                window.location = ("/building/" + pand_id + "/" + fire)
-            } */
+                url = url.concat(window.location.origin , '/building/', pand_id , '/' , fire)
+                window.location.href = url
+            }
             """)
 
     # only make polygons clickable

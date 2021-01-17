@@ -6,14 +6,60 @@
 <div class="container-md">
     <div class="row">
         <div class="col text-center">    
-            <h3>Scores of building on infrastructural effect of fires in Amsterdam</h3>
+            <h3>Infrastructural effect of fires in Amsterdam</h3>
         </div>
     </div>
     <div class="row">
         <div class="col-2">
-            <a type="button" class="btn btn-primary btn-block {{default_active}}" href={{link_default}}>Default focus</a>
-            <a type="button" class="btn btn-primary btn-block {{residential_active}}" href={{link_residential}}>Focus on residential</a>
-            <a type="button" class="btn btn-primary btn-block {{something_active}}" href={{link_something}}>Focus on road</a>
+            <h5>Show scoring</h5>
+            <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="scoring" id="heatmap" value="heatmap">
+                <label class="custom-control-label" for="heatmap">
+                    Yes
+                </label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="scoring" id="map" value="map" checked>
+                <label class="custom-control-label" for="map">
+                    No
+                </label>
+            </div>
+            <br>
+            <h5>Size of fire</h5>
+            <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="fire" id="smallFire" value="small" disabled checked>
+                <label class="custom-control-label" for="smallFire">
+                  Small fire
+                </label>
+            </div>
+                <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="fire" id="bigFire" value="big" disabled>
+                <label class="custom-control-label" for="bigFire">
+                    Big fire
+                </label>
+            </div>
+            <br>
+            <h5>Focus of scoring</h5>
+            <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="focus" id="default" value="default" disabled checked>
+                <label class="custom-control-label" for="default">
+                    Default
+                </label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="focus" id="residential" value="residential" disabled>
+                <label class="custom-control-label" for="residential">
+                    Residential
+                </label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="focus" id="roads" value="roads" disabled>
+                <label class="custom-control-label" for="roads">
+                    Roads
+                </label>
+            </div>
+            <br>
+            <a type="button" class="btn btn-primary" href=# onclick="go_to_url()">Apply</a>
         </div>
         <div class="col-8">
             {{ js_resources|indent(4)|safe }}
@@ -22,16 +68,6 @@
             {{ plot_div|indent(4)|safe }}
         </div>
         <div class="col-2"><p></p></div>
-    </div>
-    <div class = "row" style = 'padding-top: 10px'>
-        <div class = "col"></div>
-        <div class="col">
-            <a type="button" class="btn btn-primary btn-block {{small_active}}" href={{link_small}}>Small Fire</a>
-        </div>
-        <div class="col">
-            <a type="button" class="btn btn-primary btn-block {{big_active}}" href={{link_big}}>Big Fire</a>
-        </div>
-        <div class="col"></div>
     </div>
 </div>
 
