@@ -11,6 +11,9 @@ from pyproj import Transformer, transform
 from ast import literal_eval
 from collections import Counter, OrderedDict
 
+import colorcet as cc
+from simple_colors import *
+
 # can be deleted at the end
 import time
 
@@ -205,14 +208,16 @@ def draw_polygon(fig, building, fire):
 
     # print(data['full_adress'])
     data['full_adress'] = [item.replace("\n", "<br>") for item in data['full_adress']]
-    
+
     # set functions in proper form for hovertool
     all_functions = []
     for item in data["functions"]:
         item = dict(Counter(literal_eval(item)))
         string = str()
         for element in item:
-            string = string + str(element) + " " + str(item[element]) + "<br>"
+            string = string + str(item[element]) + " "  + str(element) + "<br>"
+        name = "click on the building for more information"
+        string = string + name
         all_functions.append(string)
 
 
@@ -251,7 +256,8 @@ def draw_polygon(fig, building, fire):
         [
             # use @{ } for field names with spaces
             ( 'adress'          , '@full_adress{safe}'),
-            ( 'functions',          '@functions{safe}')
+            ( 'functions',          '@functions{safe}'),
+
         ],
         formatters = {
             'full_adress'    : 'printf',
@@ -304,7 +310,8 @@ def draw_heatmap(fig, fire, score_type):
 
     data = {'xs': x_coords, 'ys': y_coords, 'id':list(df["pand_id"]), 'scores':list(scores), 'norm_scores':list(scores_normalized)}
 
-    exp_cmap = LinearColorMapper(palette="Magma256", 
+    cc.fire.reverse()
+    exp_cmap = LinearColorMapper(palette=cc.fire, 
                              low = min(scores_normalized), 
                              high = max(scores_normalized))
 
@@ -393,6 +400,8 @@ def draw_blocked_ov(fig, building, fire):
         # give lines back
         blokkage[stations] = str(i.modaliteit) + " " + str(i.lijn)
 
+    
+
     return fig, blokkage
 
 def draw_blocked_roads(fig, building, fire):
@@ -419,7 +428,7 @@ def draw_blocked_roads(fig, building, fire):
         source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy})
 
         fig.line('coordsx', 'coordsy', line_color="black", source=source, line_width=3, alpha=1, legend_label="Blocked roads")
-    
+
     return fig
 
 def get_info(building, fire):
