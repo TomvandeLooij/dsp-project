@@ -32,22 +32,33 @@
           var default_link = ['map', '0', '0'];
 
           if (equals(loc, default_link)){
-            console.log("nothing to be done");
+            var map_contents = document.getElementById("map").parentElement.getElementsByTagName("label")[0].innerHTML
+            document.getElementById("map").parentElement.getElementsByTagName("label")[0].innerHTML = map_contents.bold()
           }
           else if (loc[0] === 'building'){
             var fire = '#' + loc[2] + "Fire";
             $(fire).attr("checked", true);
+            var fire_contents = document.getElementById(loc[2]+"Fire").parentElement.getElementsByTagName("label")[0].innerHTML
+            document.getElementById(loc[2]+"Fire").parentElement.getElementsByTagName("label")[0].innerHTML = fire_contents.bold()
+
+            var map_contents = document.getElementById("map").parentElement.getElementsByTagName("label")[0].innerHTML
+            document.getElementById("map").parentElement.getElementsByTagName("label")[0].innerHTML = map_contents.bold()
           }
           else { 
-            console.log("something else")
             // put scoring to yes
             $("#heatmap").attr("checked", true);
+            var map_contents = document.getElementById("heatmap").parentElement.getElementsByTagName("label")[0].innerHTML
+            document.getElementById("heatmap").parentElement.getElementsByTagName("label")[0].innerHTML = map_contents.bold()
 
             var fire = '#' + loc[1] + "Fire";
             $(fire).attr("checked", true);
+            var fire_contents = document.getElementById(loc[1]+"Fire").parentElement.getElementsByTagName("label")[0].innerHTML
+            document.getElementById(loc[1]+"Fire").parentElement.getElementsByTagName("label")[0].innerHTML = fire_contents.bold()
 
             var focus = '#' + loc[2];
             $(focus).attr("checked", true);
+            var focus_contents = document.getElementById(loc[2]).parentElement.getElementsByTagName("label")[0].innerHTML
+            document.getElementById(loc[2]).parentElement.getElementsByTagName("label")[0].innerHTML = focus_contents.bold()
 
             // make sure focus and fire are not disabled
             $("input[name='focus']").removeAttr("disabled");

@@ -17,7 +17,7 @@ from simple_colors import *
 # can be deleted at the end
 import time
 
-
+cc.fire.reverse()
 TRAN_4326_TO_3857 = Transformer.from_crs("EPSG:4326", "EPSG:3857")
 
 def create_base_map():
@@ -348,7 +348,7 @@ def draw_heatmap(fig, fire, score_type):
             scores            = df['score_big_residential']
             scores_normalized = df['norm_score_big_residential']
         print(score_type)
-    elif score_type == 'road': 
+    elif score_type == 'roads': 
         if fire == "small":
             scores            = df['score_small_road']
             scores_normalized = df['norm_score_small_road']
@@ -374,7 +374,6 @@ def draw_heatmap(fig, fire, score_type):
 
     data['functions'] = all_functions
 
-    cc.fire.reverse()
     exp_cmap = LinearColorMapper(palette=cc.fire, 
                              low = min(scores_normalized), 
                              high = max(scores_normalized))
