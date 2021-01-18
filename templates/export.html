@@ -7,15 +7,13 @@
     <div class="col">
         <div class="row"> 
             <div class = "col">
-            <h3>FAQ</h3>
-            <h4>Calculating the scores</h4>
+            <h3>Explanation of scoring metrics</h3>
             <p>
                 When a building is on fire, there can be multiple infrastructural entities in jeopardy, like buildings, roads and 
-                public transport. To give a building a score for how much danger they present for their surrounding infrastucture, 
-                different aspects have been quantified. Every different type of building, type of road and type of public transport.
-                The scores that the different type of entities hold is given in the tables.             
+                public transport. To quantify the risk of harming surrounding entities, a score has been calculated for every function of a building, type of public transport and every type of road.
+                The scores that the different type of entities hold is given in the tables below.
                 So to calculate the score, the amount of times a certain entity occurs is multiplied with the corresponding weight. This
-                is done for all entities in the radius and summed up to the visible score in the prototype.
+                is done for all entities in the radius and summed up. These values have been normalised, resulting in a risk factor, which is the visible score in the prototype.
             </p>
             </div>
         </div>
@@ -113,7 +111,7 @@
                             <th scope="col">Type</th>
                             <th scope="col">Weight default focus</th>
                             <th scope="col">Weight residential focus</th>
-                            <th scope="col">Weigth road focus</th>
+                            <th scope="col">Weight road focus</th>
                             </tr>
                         </thead>
                         <tbody>
