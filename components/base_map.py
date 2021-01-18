@@ -269,15 +269,9 @@ def draw_polygon(fig, building, fire):
         tooltips=
         [
             # use @{ } for field names with spaces
-<<<<<<< HEAD
             ( 'address'                 , '@full_adress{safe}'),
             ( 'functions in building'   , '@functions{safe}'),
             ( "click for more information", "")
-=======
-            ( 'adress'          , '@full_adress{safe}'),
-            ( 'functions',          '@functions{safe}'),
-
->>>>>>> 9c8d8f2b99f6bb869b564805b92cbf0803cd61de
         ],
         formatters = {
             'full_adress'    : 'printf',
@@ -346,13 +340,8 @@ def draw_heatmap(fig, fire, score_type):
 
     data['functions'] = all_functions
 
-<<<<<<< HEAD
-    # get colors for heatmap
-    exp_cmap = LinearColorMapper(palette="Magma256", 
-=======
     cc.fire.reverse()
     exp_cmap = LinearColorMapper(palette=cc.fire, 
->>>>>>> 9c8d8f2b99f6bb869b564805b92cbf0803cd61de
                              low = min(scores_normalized), 
                              high = max(scores_normalized))
 
@@ -476,7 +465,6 @@ def draw_blocked_roads(fig, building, fire):
         elif i.AUTO == "plus":
             types = ["plusnet route"] * len(coordsx)
 
-<<<<<<< HEAD
         source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy, "name":names, "type":types})
 
         fig.line('coordsx', 'coordsy', line_color="black", source=source, line_width=3, alpha=1, legend_label="Blocked roads", name="road")
@@ -489,10 +477,6 @@ def draw_blocked_roads(fig, building, fire):
         ]
     ))
     
-=======
-        fig.line('coordsx', 'coordsy', line_color="black", source=source, line_width=3, alpha=1, legend_label="Blocked roads")
-
->>>>>>> 9c8d8f2b99f6bb869b564805b92cbf0803cd61de
     return fig
 
 def get_info(building, fire):
