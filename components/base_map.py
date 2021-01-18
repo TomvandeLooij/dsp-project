@@ -383,7 +383,8 @@ def draw_heatmap(fig, fire, score_type):
     s1 = ColumnDataSource(data=data)
 
     # all buildings to be plotted on map
-    glyph = fig.multi_polygons(xs='ys', ys='xs', color={"field":"norm_scores", "transform":exp_cmap}, name="pand", source = s1, alpha=0.8)
+    glyph = fig.multi_polygons(xs='ys', ys='xs', color={"field":"norm_scores", "transform":exp_cmap}, name="pand", 
+                                source = s1, alpha=0.8, line_color="black", line_width=0.05)
     
     # what happens in the call
     call = CustomJS(args=dict(source=s1, fire=fire), code="""
