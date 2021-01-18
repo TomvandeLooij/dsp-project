@@ -61,10 +61,15 @@
                 {{value}} {{key}} <br/>
                 {% endfor %}
             </p>
-            <p><b class="h6">Public transport:</b><br>
+            <p><b class="h6">Blocked public transport:</b><br>
                 {% for key, value in stations.items() %}
                 {{key}} <br/>
                 {{value}} <br/>
+                {% endfor %}
+            </p>
+            <p><b class="h6">Blocked roads:</b><br>
+                {% for road, type in roads.items() %}
+                {{road}}: {{type}} <br/>
                 {% endfor %}
             </p>
             <p><b class="h6">Addresses of buildings in radius excl selected building:</b> <br>

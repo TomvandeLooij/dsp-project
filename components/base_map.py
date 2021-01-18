@@ -432,8 +432,6 @@ def draw_blocked_ov(fig, building, fire):
         # give lines back
         blokkage[stations] = str(i.modaliteit) + " " + str(i.lijn)
 
-    
-
     return fig, blokkage
 
 def draw_blocked_roads(fig, building, fire):
@@ -445,10 +443,12 @@ def draw_blocked_roads(fig, building, fire):
         road_ids = literal_eval(building.roads_big.values[0])
 
     if len(road_ids) == 0:
-        return fig
+        return fig, {"No blocked roads.":""}
 
     df_roads = df[df.number.isin(road_ids)]
     df_roads['WKT_LAT_LNG'] = df.WKT_LAT_LNG.apply(convert)
+
+    blocked_roads = {}
 
     for i in df_roads.itertuples():
         coordsx = []
@@ -460,10 +460,13 @@ def draw_blocked_roads(fig, building, fire):
         names = [i.STT_NAAM] * len(coordsx)
         if i.AUTO == "calamiteit":
             types = ["calamiteiten route"] * len(coordsx)
+            blocked_roads[i.STT_NAAM] = "calamiteiten route"
         elif i.AUTO == "hoofd":
             types = ["hoofdnet route"] * len(coordsx)
+            blocked_roads[i.STT_NAAM] = "hoofdnet route"
         elif i.AUTO == "plus":
             types = ["plusnet route"] * len(coordsx)
+            blocked_roads[i.STT_NAAM] = "plusnet route"
 
         source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy, "name":names, "type":types})
 
@@ -477,10 +480,11 @@ def draw_blocked_roads(fig, building, fire):
         ]
     ))
     
-    return fig
+    return fig, blocked_roads
 
 def get_info(building, fire):
-    df = pd.read_csv("./data/city_area_buildings.csv", usecols=["pand_id", "gebruiksdoelVerblijfsobject", "neighbors", "linked_small", "linked_big", "full_adress"])
+    df = pd.read_csv("./data/city_area_buildings.csv", usecols=["pand_id", "gebruiksdoelVerblijfsobject", "neighbors", "linked_small", "linked_big", 
+                                                                "full_adress"])
     
     # get all functions from building
     df_building = df[df.pand_id == float(building)]

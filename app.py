@@ -73,7 +73,7 @@ def get_information(pand_id, fire):
     fig = base_map.add_public_transport(fig)
     fig = base_map.draw_polygon(fig, float(pand_id), fire)
     fig, stations = base_map.draw_blocked_ov(fig, building, fire)
-    fig = base_map.draw_blocked_roads(fig, building, fire)
+    fig, roads = base_map.draw_blocked_roads(fig, building, fire)
 
     # remove logo and toolbar
     fig.toolbar.logo = None
@@ -138,6 +138,7 @@ def get_information(pand_id, fire):
         risk_score_residential = risk_score_residential,
         risk_score_road = risk_score_road,
         stations = stations,
+        roads = roads,
         plot_script=script,
         plot_div=div,
         js_resources=js_resources,
