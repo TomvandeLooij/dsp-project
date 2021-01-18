@@ -10,6 +10,19 @@
     </div>
     <div class="row">
         <div class="col border px-5">
+            <h5>Show scoring</h5>
+            <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="scoring" id="heatmap" value="heatmap">
+                <label class="custom-control-label" for="heatmap">
+                    Yes
+                </label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="scoring" id="map" value="map" checked>
+                <label class="custom-control-label" for="map">
+                    No
+                </label>
+            </div>
             <h5>Size of fire</h5>
             <div class="custom-control custom-radio">
                 <input class="custom-control-input" type="radio" name="fire" id="smallFire" value="small" checked>
@@ -21,6 +34,25 @@
                 <input class="custom-control-input" type="radio" name="fire" id="bigFire" value="big">
                 <label class="custom-control-label" for="bigFire">
                     Big fire
+                </label>
+            </div>
+            <h5>Focus of scoring</h5>
+            <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="focus" id="default" value="default" disabled checked>
+                <label class="custom-control-label" for="default">
+                    default
+                </label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="focus" id="residential" value="residential" disabled>
+                <label class="custom-control-label" for="residential">
+                    Residential
+                </label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="focus" id="roads" value="roads" disabled>
+                <label class="custom-control-label" for="roads">
+                    Roads
                 </label>
             </div>
             <br>

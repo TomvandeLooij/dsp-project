@@ -11,7 +11,9 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
     <script type="text/javascript">
+      console.log("this is a test")
       console.log(sessionStorage)
+      console.log("this is a test 2")
 
       $(document).ready(function(){
 
@@ -55,15 +57,29 @@
 
           // focus is only selectable when show scoring is set to yes
           $("input[name='scoring']").change(function () {
-            if($("#heatmap").prop('checked')){
-              $("input[name='focus']").removeAttr("disabled");
-              $("input[name='fire']").removeAttr("disabled");
-              console.log("this is yes selected and should activate focus group");
+            var loc = window.location.href;
+            loc = loc.split('/').slice(-3,);
+            if (loc[0] == "building"){
+              if($("#heatmap").prop('checked')){
+                $("input[name='focus']").removeAttr("disabled");
+                console.log("this is yes selected and should activate focus group");
+              }
+              else{
+                $("input[name='focus']").attr("disabled", "disabled");
+                console.log("this is no selected");
+              };
             }
-            else{
-              $("input[name='focus']").attr("disabled", "disabled");
-              $("input[name='fire']").attr("disabled", "disabled");
-              console.log("this is no selected");
+            else {
+              if($("#heatmap").prop('checked')){
+                $("input[name='focus']").removeAttr("disabled");
+                $("input[name='fire']").removeAttr("disabled");
+                console.log("this is yes selected and should activate focus group");
+              }
+              else{
+                $("input[name='focus']").attr("disabled", "disabled");
+                $("input[name='fire']").attr("disabled", "disabled");
+                console.log("this is no selected");
+              };
             };
           });
           
@@ -95,7 +111,16 @@
       };
 
       function change_fire_size () {
-        window.location = $("input[name='fire']:checked").val()
+        if ($("#map").is(":checked")){
+          window.location = $("input[name='fire']:checked").val()
+        }
+        else if ($("#heatmap").is(":checked")){
+          console.log(window.location)
+          var url = '';
+          url = url.concat(window.location.origin, '/', 'heatmap', '/', $("input[name='fire']:checked").val(), '/', $("input[name='focus']:checked").val())
+          console.log(url)
+          window.location.href = url
+        };
       };
       
       </script>

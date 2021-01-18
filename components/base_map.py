@@ -25,7 +25,7 @@ def create_base_map():
 
     tile_provider = get_provider(Vendors.CARTODBPOSITRON_RETINA)
 
-    fig = figure(x_range=(530683.95, 555576.10), y_range=(6854570.54, 6876203.35),
+    fig = figure(x_range=(543910.459905604, 549882.1261916904), y_range=(6863397.16441418, 6867925.895324006),
                  x_axis_type="mercator", y_axis_type="mercator", plot_width=800, plot_height=550,
                  tools="pan,wheel_zoom,reset", active_scroll='wheel_zoom')
 
@@ -82,7 +82,7 @@ def draw_building_radius(fig, building, fire):
     y_coords_scaled = [c[0] for c in scaled_coordinates]
 
     # draw radius on map
-    fig.patch(y_coords_scaled, x_coords_scaled, line_width=5, alpha = 0.2, color="red", legend_label="Fire radius")
+    fig.patch(y_coords_scaled, x_coords_scaled, line_width=5, alpha = 0.2, color="red", legend_label=fire.capitalize() + " fire radius")
 
     return fig
 
@@ -227,8 +227,8 @@ def draw_polygon(fig, building, fire):
         string = str()
         for element in item:
             string = string + str(item[element]) + " "  + str(element) + "<br>"
-        name = "click on the building for more information"
-        string = string + name
+        # name = "click on the building for more information"
+        string = string #+ name
         all_functions.append(string)
 
 
@@ -263,16 +263,50 @@ def draw_polygon(fig, building, fire):
     tap = TapTool(renderers=[glyph], callback=call)
     fig.add_tools(tap)
 
+
+    # this is html for the hovertip
+    TOOLTIPS = """
+    <div class="bk" style="display: table; border-spacing: 2px;">
+        <!-- one row -->
+        <div class="bk" style="display: table-row;">
+            <div class="bk bk-tooltip-row-label" style="display: table-cell;">Address:
+            </div>
+            <div class="bk bk-tooltip-row-value" style="display: table-cell;">
+            <span class="bk" data-value="">@full_adress{safe}
+            </span>
+            <span class="bk bk-tooltip-color-block" data-swatch="" style="display: none;">
+            </span>
+            </div>
+        </div>
+        <!-- one row -->
+        <div class="bk" style="display: table-row;">
+            <div class="bk bk-tooltip-row-label" style="display: table-cell;">Functions in building: </div>
+            <div class="bk bk-tooltip-row-value" style="display: table-cell;">
+            <span class="bk" data-value="">@functions{safe}
+            </span>
+            <span class="bk bk-tooltip-color-block" data-swatch="" style="display: none;">
+            </span>
+            </div>
+        </div>
+        <!-- one row -->
+        <div class="bk" style="display: table-row;">
+            <div class="bk bk-tooltip-row-label" style="display: table-cell;"></div>
+            <div class="bk bk-tooltip-row-value" style="display: table-cell; color:blue;">Click for more information <br> on building</div>
+        </div>
+    </div>
+    """
+
+
     # create hovertool
     fig.add_tools(HoverTool(
         renderers=[glyph],
-        tooltips=
-        [
-            # use @{ } for field names with spaces
-            ( 'address'                 , '@full_adress{safe}'),
-            ( 'functions in building'   , '@functions{safe}'),
-            ( "click for more information", "")
-        ],
+        tooltips=TOOLTIPS,
+        # [
+        #     # use @{ } for field names with spaces
+        #     ( 'address'                 , '@full_adress{safe}'),
+        #     ( 'functions in building'   , '@functions{safe}'),
+        #     ( "click for more information", "")
+        # ],
         formatters = {
             'full_adress'    : 'printf',
             'functions'      : 'printf'
@@ -371,13 +405,57 @@ def draw_heatmap(fig, fire, score_type):
     tap = TapTool(renderers=[glyph], callback=call)
     fig.add_tools(tap)
 
+    TOOLTIPS="""
+    <div class="bk" style="display: table; border-spacing: 2px;">
+        <!-- one row -->
+        <div class="bk" style="display: table-row;">
+            <div class="bk bk-tooltip-row-label" style="display: table-cell;">Score:
+            </div>
+            <div class="bk bk-tooltip-row-value" style="display: table-cell;">
+            <span class="bk" data-value="">@norm_scores{0.2f}
+            </span>
+            <span class="bk bk-tooltip-color-block" data-swatch="" style="display: none;">
+            </span>
+            </div>
+        </div>
+        <!-- one row -->
+        <div class="bk" style="display: table-row;">
+            <div class="bk bk-tooltip-row-label" style="display: table-cell;">Address:
+            </div>
+            <div class="bk bk-tooltip-row-value" style="display: table-cell;">
+            <span class="bk" data-value="">@full_adress{safe}
+            </span>
+            <span class="bk bk-tooltip-color-block" data-swatch="" style="display: none;">
+            </span>
+            </div>
+        </div>
+        <!-- one row -->
+        <div class="bk" style="display: table-row;">
+            <div class="bk bk-tooltip-row-label" style="display: table-cell;">Functions in building: </div>
+            <div class="bk bk-tooltip-row-value" style="display: table-cell;">
+            <span class="bk" data-value="">@functions{safe}
+            </span>
+            <span class="bk bk-tooltip-color-block" data-swatch="" style="display: none;">
+            </span>
+            </div>
+        </div>
+        <!-- one row -->
+        <div class="bk" style="display: table-row;">
+            <div class="bk bk-tooltip-row-label" style="display: table-cell;"></div>
+            <div class="bk bk-tooltip-row-value" style="display: table-cell; color:blue;">Click for more information <br> on building</div>
+        </div>
+    </div>
+    """
+
+
     fig.add_tools(HoverTool(
         renderers=[glyph],
-        tooltips=[
-            ("score", "@norm_scores{0.2f}"),
-            ("address", "@full_adress{safe}"),
-            ("functions in building", "@functions{safe}")
-        ]
+        tooltips=TOOLTIPS
+        # tooltips=[
+        #     ("score", "@norm_scores{0.2f}"),
+        #     ("address", "@full_adress{safe}"),
+        #     ("functions in building", "@functions{safe}")
+        # ]
     ))
 
     bar = ColorBar(color_mapper=exp_cmap, location=(0,0))
