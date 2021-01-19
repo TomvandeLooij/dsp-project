@@ -1,6 +1,7 @@
 bokeh==2.2.3
 certifi==2020.12.5
 click==7.1.2
+colorcet==2.0.5
 Flask==1.1.2
 gunicorn==20.0.4
 itsdangerous==1.1.0
@@ -9,8 +10,10 @@ MarkupSafe==1.1.1
 numpy==1.19.4
 packaging==20.4
 pandas==1.1.5
+param==1.10.1
 Pillow==8.0.1
 pyclipper==1.2.0
+pyct==0.4.8
 pyparsing==2.4.7
 pyproj==3.0.0.post1
 python-dateutil==2.8.1
