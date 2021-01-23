@@ -458,7 +458,7 @@ def draw_heatmap(fig, fire, score_type):
         # ]
     ))
 
-    bar = ColorBar(color_mapper=exp_cmap, location=(0,0))
+    bar = ColorBar(color_mapper=exp_cmap, location=(0,0), major_label_overrides={0:"0   Low effect", 1:"1   High effect"}, major_label_text_align="left")
     fig.add_layout(bar, "right")
 
     return fig

@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask, render_template, request, json
+from flask import Flask, render_template, request, json, redirect
 from bokeh.embed import components
 from bokeh.resources import INLINE
 from bokeh.models.callbacks import CustomJS
@@ -18,6 +18,11 @@ from .components import base_map
 app = Flask(__name__)
 # Configurations
 ALOWED_CORS_DOMAIN = 'http://localhost:8080'
+
+@app.route("/")
+def start():
+    return redirect("/map/0/0")
+
 
 @app.route('/<heatmap>/<fire>/<focus>', methods=(['GET']))
 def home(heatmap, fire, focus):
