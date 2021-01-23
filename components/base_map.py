@@ -451,11 +451,6 @@ def draw_heatmap(fig, fire, score_type):
     fig.add_tools(HoverTool(
         renderers=[glyph],
         tooltips=TOOLTIPS
-        # tooltips=[
-        #     ("score", "@norm_scores{0.2f}"),
-        #     ("address", "@full_adress{safe}"),
-        #     ("functions in building", "@functions{safe}")
-        # ]
     ))
 
     bar = ColorBar(color_mapper=exp_cmap, location=(0,0), major_label_overrides={0:"0   Low effect", 1:"1   High effect"}, major_label_text_align="left")
