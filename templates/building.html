@@ -9,7 +9,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-xs-2 px-3 border">
+        <div class="col-xs-2 px-3">
             <h5>Show scoring</h5>
             <div class="custom-control custom-radio">
                 <input class="custom-control-input" type="radio" name="scoring" id="heatmap" value="heatmap">
@@ -60,13 +60,13 @@
             <br>
             <a type="button" class="btn btn-primary" href=# onclick="change_fire_size()">Apply</a>
         </div>
-        <div class="col border">
+        <div class="col">
             {{ js_resources|indent(4)|safe }}
             {{ css_resources|indent(4)|safe }}
             {{ plot_script|indent(4)|safe }}
             {{ plot_div|indent(4)|safe }}
         </div>  
-        <div class="col small border">
+        <div class="col small">
             <p><b class="h6">Address(es)</b> <br /> {{adress|safe}}
             </p>
             <p><b class="h6">Present in the building: </b> <br />
@@ -84,7 +84,7 @@
                 Road focus: {{ risk_score_road }}
             </p>
         </div>
-        <div class="col small border">
+        <div class="col small">
             <p><b class="h6">{{amount_adjacent}} adjacent buildings with functions:</b><br>
                 {% for key, value in neighbor_info.items() %}
                 {{value}} {{key}} <br/>
