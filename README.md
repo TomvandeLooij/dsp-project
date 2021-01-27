@@ -1,5 +1,7 @@
-# dsp-project
+# Infrastructural effect of fires in Amsterdam
+Project created for the course Data System Project at the university of Amsterdam with an assignment from the municipality of Amsterdam.
 
+## Setting up the prototype locally
 Create a new environment:
 
     python3 -m venv env
@@ -14,4 +16,10 @@ Install depedencies:
 
 Run the server:
 
+    # for IOS users
     FLASK_APP=app.py FLASK_ENV=development flask run
+
+    # for windows users
+    set FLAKS_APP=app.py
+    set FLASK_ENV=development
+    flask run
