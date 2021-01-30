@@ -12,7 +12,6 @@ from ast import literal_eval
 from collections import Counter, OrderedDict
 
 import colorcet as cc
-from simple_colors import *
 
 # can be deleted at the end
 import time
@@ -114,11 +113,16 @@ def add_public_transport(fig):
         for coord in i.WKT_LAT_LNG:
             coordsx.append(coord[0])
             coordsy.append(coord[1])
-        
+            
         lijn = i.Lijn.replace(" ", '').split("|")
-        lijn = ", ".join(lijn)
-        k = lijn.rfind(", ")
-        lijn = lijn[:k] + " and" + lijn[k+1:]
+        if len(lijn) == 1:
+            lijn = lijn[0]
+            print(lijn)
+        else: 
+            lijn = ", ".join(lijn)
+            k = lijn.rfind(", ")
+            lijn = lijn[:k] + " and " + lijn[k+1:]
+            print(lijn)
 
         modaliteit = [i.Modaliteit] * len(coordsx)
         lijn = [lijn] * len(coordsx)
