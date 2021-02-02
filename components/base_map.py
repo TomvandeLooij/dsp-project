@@ -1,22 +1,20 @@
 import pandas as pd
 import numpy as np
 import pyclipper
+from pyproj import Transformer, transform
+from ast import literal_eval
+from collections import Counter, OrderedDict
+import colorcet as cc
 
+# import bokeh modules
 from bokeh.plotting import figure, show
 from bokeh.tile_providers import get_provider, Vendors
 from bokeh.models.callbacks import CustomJS
 from bokeh.models import ColumnDataSource, TapTool, CustomJS, HoverTool, Line, MultiLine, LinearColorMapper, BasicTicker, ColorBar
 
-from pyproj import Transformer, transform
-from ast import literal_eval
-from collections import Counter, OrderedDict
-
-import colorcet as cc
-
-# can be deleted at the end
-import time
-
+# reverse color map
 cc.fire.reverse()
+
 TRAN_4326_TO_3857 = Transformer.from_crs("EPSG:4326", "EPSG:3857")
 
 def create_base_map():
@@ -46,6 +44,7 @@ def create_zoomed_map(coordinates):
 
     tile_provider = get_provider(Vendors.CARTODBPOSITRON_RETINA)
 
+    # create zoomed in figure
     fig = figure(x_range=x_range, y_range=y_range,
                  x_axis_type="mercator", y_axis_type="mercator", plot_width=800, plot_height=550,
                  tools="pan,wheel_zoom,reset", active_scroll='wheel_zoom')
@@ -95,45 +94,52 @@ def convert(test):
 
     final = []
     for coord in test3:
+        # only keep coordinates if not equal to ""
         if len(coord)>2:
             coord = [c for c in coord if c != ""]
+
+        # transform coordinates to be able to be plotted on map
         transformed_coord = TRAN_4326_TO_3857.transform(float(coord[0]), float(coord[1]))
         final.append([transformed_coord[0], transformed_coord[1]])
 
     return final
 
 def add_public_transport(fig):
-    # add lines to plot
+    """"Draw all of the public transport lines and stations. Also creates hover function so """
+
+    # put data about lines into frame and put to the rigth dtype
     df = pd.read_csv("./data/tram_metro_lijnen.csv")
     df['WKT_LAT_LNG'] = df['WKT_LAT_LNG'].apply(convert)
 
+    # plot every line
     for i in df.itertuples():
         coordsx = []
         coordsy = []
         for coord in i.WKT_LAT_LNG:
             coordsx.append(coord[0])
             coordsy.append(coord[1])
-            
+        
+        # put line information in the right format
         lijn = i.Lijn.replace(" ", '').split("|")
         if len(lijn) == 1:
             lijn = lijn[0]
-            print(lijn)
         else: 
             lijn = ", ".join(lijn)
             k = lijn.rfind(", ")
             lijn = lijn[:k] + " and " + lijn[k+1:]
-            print(lijn)
 
         modaliteit = [i.Modaliteit] * len(coordsx)
         lijn = [lijn] * len(coordsx)
         
         source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy, "modality":modaliteit, "lijn":lijn})
 
+        # add lines to plot
         if modaliteit[0] == "Tram":
             fig.line("coordsx", "coordsy", line_color="blue", line_width=2.5, alpha=0.8, name="ov", source=source, legend_label="Tram")
         elif modaliteit[0] == "Metro":
             fig.line("coordsx", "coordsy", line_color="green", line_width=2.5, alpha=0.8, name="ov", source=source, legend_label="Metro")
 
+    # create hover tool for the lines
     fig.add_tools(HoverTool(
         names=['ov'],
         tooltips=[
@@ -141,11 +147,11 @@ def add_public_transport(fig):
         ]
     ))
 
-    # add stations to plot
+    # put data about stations into the frame and put columns in right dtype
     df = pd.read_csv('./data/TRAMMETRO_PUNTEN_2020.csv', error_bad_lines=False, encoding="utf-8", delimiter=";")
-
     df['WKT_LAT_LNG'] = df['WKT_LAT_LNG'].apply(lambda x: x.replace("POINT(", "").replace(")", ""))
     
+    # plot every station
     for i in df.itertuples():
         coords = i.WKT_LAT_LNG.split(",")
         transformed_coord = TRAN_4326_TO_3857.transform(float(coords[0]), float(coords[1]))
@@ -163,8 +169,10 @@ def add_public_transport(fig):
 
         source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy, "modality":modaliteit, "lijn":lijn, "station":stations})
 
+        # add stations to plot
         fig.circle("coordsx", "coordsy", alpha=0.8, name="stations", color="black", size=5, source=source)
     
+    # create hover tool for stations
     fig.add_tools(HoverTool(
         names=['stations'],
         tooltips=[
@@ -178,6 +186,7 @@ def add_public_transport(fig):
 def draw_polygon(fig, building, fire):
     """"Draws all polygons given in the dataset and makes them clickable"""
 
+    # read in data
     df = pd.read_csv("./data/city_area_buildings.csv")
 
     # if a building is selected
@@ -207,11 +216,11 @@ def draw_polygon(fig, building, fire):
     x_coords = []
     y_coords = []
 
-    # time save use apply function instead of looping 4 seconds just for this part
     # split coordinates to x and y coordinates
     df["wgs"] = df['wgs'].apply(lambda x:literal_eval(x))
     df['full_adress'] = df["full_adress"].apply(str)
-    
+
+    # put coordinates of buildings in right format for polygons
     for i in df.itertuples():
         coords = i.wgs
         coords = [TRAN_4326_TO_3857.transform(float(coord[0]), float(coord[1])) for coord in coords]
@@ -221,18 +230,18 @@ def draw_polygon(fig, building, fire):
     data = {'xs': x_coords, 'ys': y_coords, 'id':list(df["pand_id"]),  'full_adress':list(df['full_adress']), 
             'functions':list(df['gebruiksdoelVerblijfsobject'])}
 
-    # print(data['full_adress'])
+    # put address in right format for hovertool
     data['full_adress'] = [item.replace("\n", "<br>") for item in data['full_adress']]
 
-    # set functions in proper form for hovertool
+    # count functions and put them in right format
     all_functions = []
     for item in data["functions"]:
+        # count functions
         item = dict(Counter(literal_eval(item)))
         string = str()
         for element in item:
             string = string + str(item[element]) + " "  + str(element) + "<br>"
-        # name = "click on the building for more information"
-        string = string #+ name
+        string = string 
         all_functions.append(string)
 
 
@@ -244,7 +253,7 @@ def draw_polygon(fig, building, fire):
     # all buildings to be plotted on map
     glyph = fig.multi_polygons(xs='ys', ys='xs', color="peru", name="pand", source=s1, alpha=0.3)
 
-    # what happens in the call
+    # call back for when buildings are clicked
     call = CustomJS(args=dict(source=s1, fire=fire), code="""
             /* console.log(cb_data.source.selected.indices[0]); */
 
@@ -253,7 +262,7 @@ def draw_polygon(fig, building, fire):
             console.log(pand_id);
             var url = '';
 
-            /* here comes ajax callback, default fire size is small*/
+            /* here comes ajax callback, default fire size is small otherwise fire size is given*/
             if (fire == "not") {
                 url = url.concat(window.location.origin , '/building/', pand_id , '/small')
                 window.location.href = url
@@ -268,7 +277,7 @@ def draw_polygon(fig, building, fire):
     fig.add_tools(tap)
 
 
-    # this is html for the hovertip
+    # this is custom html for the hovertip (necassary to add "Click for more info...")
     TOOLTIPS = """
     <div class="bk" style="display: table; border-spacing: 2px;">
         <!-- one row -->
@@ -301,16 +310,10 @@ def draw_polygon(fig, building, fire):
     """
 
 
-    # create hovertool
+    # add hovertool to map
     fig.add_tools(HoverTool(
         renderers=[glyph],
         tooltips=TOOLTIPS,
-        # [
-        #     # use @{ } for field names with spaces
-        #     ( 'address'                 , '@full_adress{safe}'),
-        #     ( 'functions in building'   , '@functions{safe}'),
-        #     ( "click for more information", "")
-        # ],
         formatters = {
             'full_adress'    : 'printf',
             'functions'      : 'printf'
@@ -321,6 +324,8 @@ def draw_polygon(fig, building, fire):
 
 def draw_heatmap(fig, fire, score_type):
     """"Draws all polygons given in the dataset and makes them clickable"""
+    
+    # load data
     df = pd.read_csv("./data/city_area_buildings.csv")
 
     x_coords = []
@@ -336,6 +341,7 @@ def draw_heatmap(fig, fire, score_type):
         x_coords.append([[[c[1] for c in coords]]])
         y_coords.append([[[c[0] for c in coords]]])
 
+    # identify score and fire type and select scores based on that
     if score_type == 'default':
         if fire == "small":
             scores            = df['score_small_default']
@@ -343,15 +349,12 @@ def draw_heatmap(fig, fire, score_type):
         elif fire == "big":
             scores            = df['score_big_default']
             scores_normalized = df['norm_score_big_default']
-        print(score_type)
     elif score_type == 'residential':
         if fire == "small":
             scores            = df['score_small_residential']
             scores_normalized = df['norm_score_small_residential']
         elif fire == "big":
             scores            = df['score_big_residential']
-            scores_normalized = df['norm_score_big_residential']
-        print(score_type)
     elif score_type == 'roads': 
         if fire == "small":
             scores            = df['score_small_road']
@@ -359,8 +362,8 @@ def draw_heatmap(fig, fire, score_type):
         elif fire == "big":
             scores            = df['score_big_road']
             scores_normalized = df['norm_score_big_road']
-        print(score_type)
 
+    # put all selected data into dictionary
     data = {'xs': x_coords, 'ys': y_coords, 'id':list(df["pand_id"]), 'scores':list(scores), 'norm_scores':list(scores_normalized), 
             'full_adress':list(df['full_adress']), 'functions':list(df['gebruiksdoelVerblijfsobject'])}
     
@@ -378,6 +381,7 @@ def draw_heatmap(fig, fire, score_type):
 
     data['functions'] = all_functions
 
+    # create color mapper for plotting
     exp_cmap = LinearColorMapper(palette=cc.fire, 
                              low = min(scores_normalized), 
                              high = max(scores_normalized))
@@ -389,7 +393,7 @@ def draw_heatmap(fig, fire, score_type):
     glyph = fig.multi_polygons(xs='ys', ys='xs', color={"field":"norm_scores", "transform":exp_cmap}, name="pand", 
                                 source = s1, alpha=0.8, line_color="black", line_width=0.05)
     
-    # what happens in the call
+    # callback when a building is clicked
     call = CustomJS(args=dict(source=s1, fire=fire), code="""
             /* console.log(cb_data.source.selected.indices[0]); */
 
@@ -409,6 +413,7 @@ def draw_heatmap(fig, fire, score_type):
     tap = TapTool(renderers=[glyph], callback=call)
     fig.add_tools(tap)
 
+    # custom hovertool (necessary for "Click for more info..." part)
     TOOLTIPS="""
     <div class="bk" style="display: table; border-spacing: 2px;">
         <!-- one row -->
@@ -451,56 +456,62 @@ def draw_heatmap(fig, fire, score_type):
     </div>
     """
 
-
+    # add hovertool to map
     fig.add_tools(HoverTool(
         renderers=[glyph],
         tooltips=TOOLTIPS
     ))
 
+    # create and add colorbar to map
     bar = ColorBar(color_mapper=exp_cmap, location=(0,0), major_label_overrides={0:"0   Low effect", 1:"1   High effect"}, major_label_text_align="left")
     fig.add_layout(bar, "right")
 
     return fig
 
 def draw_blocked_ov(fig, building, fire):
-    ov = pd.read_csv("./data/tram en metro lijnen plus stations.csv")
+    """Draws blocked public transport on top of other transport. Eliminates for extra hover tool."""
 
+    # load data
+    ov = pd.read_csv("./data/tram en metro lijnen plus stations.csv")
+    
+    # get blocked ov id's based on fire size
     if fire == "big":
         numbers = building.ov_big.values[0]
-        if numbers == "[]":
-            return fig, {"No blokked public transport.":""}
-        
-
     elif fire == "small":
         numbers = building.ov_small.values[0]
-        if numbers == "[]":
-            return fig, {"No blokked public transport.":""}
-        
-    df = ov[ov.number.isin(literal_eval(numbers))]
 
+    # if nothing blocked return
+    if numbers == "[]":
+        return fig, {"No blokked public transport.":""}
+
+    # transform list to string    
+    df = ov[ov.number.isin(literal_eval(numbers))]
     df['lijn_coordinaten'] = df.lijn_coordinaten.apply(convert)
     
+    # go through every line with its corresponding stations
     blokkage = {}
-
     for i in df.itertuples():
         coordsx = []
         coordsy = []
         for coord in i.lijn_coordinaten:
             coordsx.append(coord[0])
             coordsy.append(coord[1])
-        
+
+        # draw the lines that are blocked
         fig.line(coordsx, coordsy, line_color="red", line_width=2.5, alpha=1, legend_label="Blocked public transport")
 
         # station 1
         coords = i.coords_s1.split(" ")
         transformed_coords = TRAN_4326_TO_3857.transform(float(coords[0]), float(coords[1]))
 
+        # draw station that is blocked
         fig.circle(transformed_coords[0], transformed_coords[1], color="red", size=6)
 
         # station 2
         coords = i.coords_s2.split(" ")
         transformed_coords = TRAN_4326_TO_3857.transform(float(coords[0]), float(coords[1]))
 
+        # draw station 2 blocked
         fig.circle(transformed_coords[0], transformed_coords[1], color="red", size=6)
 
         # give stations back
@@ -512,21 +523,26 @@ def draw_blocked_ov(fig, building, fire):
     return fig, blokkage
 
 def draw_blocked_roads(fig, building, fire):
+    """Draw all blocked roads"""
+
+    # load data
     df = pd.read_csv("./data/all_roads_amsterdam.csv")
 
+    # select road ids based on fire size
     if fire == "small":
         road_ids = literal_eval(building.roads_small.values[0])
     elif fire == "big":
         road_ids = literal_eval(building.roads_big.values[0])
 
+    # if nothing is blocked return
     if len(road_ids) == 0:
         return fig, {"No blocked roads.":""}
 
+    # put data in right format
     df_roads = df[df.number.isin(road_ids)]
     df_roads['WKT_LAT_LNG'] = df.WKT_LAT_LNG.apply(convert)
 
     blocked_roads = {}
-
     for i in df_roads.itertuples():
         coordsx = []
         coordsy = []
@@ -534,6 +550,7 @@ def draw_blocked_roads(fig, building, fire):
             coordsx.append(coord[0])
             coordsy.append(coord[1])
 
+        # select information about blocked roads
         names = [i.STT_NAAM] * len(coordsx)
         if i.AUTO == "calamiteit":
             types = ["calamiteiten route"] * len(coordsx)
@@ -547,8 +564,10 @@ def draw_blocked_roads(fig, building, fire):
 
         source = ColumnDataSource(data={"coordsx":coordsx, "coordsy":coordsy, "name":names, "type":types})
 
+        # add blocked line to figure
         fig.line('coordsx', 'coordsy', line_color="black", source=source, line_width=3, alpha=1, legend_label="Blocked roads", name="road")
 
+    # add hover tool map
     fig.add_tools(HoverTool(
         names=['road'],
         tooltips=[
@@ -560,8 +579,13 @@ def draw_blocked_roads(fig, building, fire):
     return fig, blocked_roads
 
 def get_info(building, fire):
-    df = pd.read_csv("./data/city_area_buildings.csv", usecols=["pand_id", "gebruiksdoelVerblijfsobject", "neighbors", "linked_small", "linked_big", 
-                                                                "full_adress"])
+    """
+    Get information abour function in building, functions about buildings in neighboring buildings and radius. How many neighboring 
+    buildings and how many buildings are present in the radius and the full adresses.
+    """
+    # load data
+    df = pd.read_csv("./data/city_area_buildings.csv", usecols=["pand_id", "gebruiksdoelVerblijfsobject", "neighbors", "linked_small", 
+                                                                "linked_big", "full_adress"])
     
     # get all functions from building
     df_building = df[df.pand_id == float(building)]
@@ -579,6 +603,7 @@ def get_info(building, fire):
     elif fire == "big":
         column = "linked_big"
 
+    # put data in right format
     df_linked = df[df.pand_id.isin(literal_eval(df_building[column].values[0]))] 
     linked_buildings = list(df_linked.gebruiksdoelVerblijfsobject)
     linked_functions = [item for lijst in linked_buildings for item in literal_eval(lijst)]
@@ -592,6 +617,7 @@ def get_info(building, fire):
     count_unkown = df_linked.full_adress.isnull().values.ravel().sum()
     all_adresses = list(df_linked.loc[df_linked['full_adress'].notnull(), 'full_adress'].values)
 
+    # create complete address
     complete_adress = str()
     for adress in all_adresses:
         if "All in Amsterdam" in adress:
