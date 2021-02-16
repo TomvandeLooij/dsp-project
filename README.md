@@ -16,10 +16,10 @@ Install depedencies:
 
 Run the server:
 
-    # for IOS users
+    # UNIX
     FLASK_APP=app.py FLASK_ENV=development flask run
 
-    # for windows users
+    # Windows
     set FLAKS_APP=app.py
     set FLASK_ENV=development
     flask run
