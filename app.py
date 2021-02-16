@@ -13,7 +13,7 @@ from ast import literal_eval
 import time
 import numpy as np
 
-from .components import base_map
+from .components import base_map, heatmap, buildings, blocked_routes
 
 app = Flask(__name__)
 # Configurations
@@ -24,19 +24,19 @@ def start():
     return redirect("/map/0/0")
 
 
-@app.route('/<heatmap>/<fire>/<focus>', methods=(['GET']))
-def home(heatmap, fire, focus):
+@app.route('/<map_type>/<fire>/<focus>', methods=(['GET']))
+def home(map_type, fire, focus):
     # plot figure
     fig = base_map.create_base_map()
     fig = base_map.add_public_transport(fig)
 
-    if heatmap == "map":
-        fig = base_map.draw_polygon(fig, "not", "not")
-    elif heatmap == "heatmap":
-        fig = base_map.draw_heatmap(fig, fire, focus)
+    if map_type == "map":
+        fig = buildings.draw_polygon(fig, "not", "not")
+    elif map_type == "heatmap":
+        fig = heatmap.draw_heatmap(fig, fire, focus)
 
     # remove logo and toolbar
-    fig.toolbar.logo = None
+    fig.toolbar.logo     = None
     fig.toolbar_location = None
     
     callback = CustomJS(args=dict(plot = fig), code="""
@@ -51,7 +51,7 @@ def home(heatmap, fire, focus):
     fig.y_range.js_on_change('start', callback)
 
     # grab the static resources
-    js_resources = INLINE.render_js()
+    js_resources  = INLINE.render_js()
     css_resources = INLINE.render_css()
 
     # # render template
@@ -65,6 +65,7 @@ def home(heatmap, fire, focus):
         css_resources=css_resources
         )
 
+
 @app.route('/building/<pand_id>/<fire>', methods=(['GET']))
 def get_information(pand_id, fire):
     df       = pd.read_csv('./data/city_area_buildings.csv')
@@ -74,25 +75,26 @@ def get_information(pand_id, fire):
 
     # plot figure
     fig = base_map.create_zoomed_map(coordinates)
-    fig = base_map.draw_building_radius(fig, building, fire)
+    fig = buildings.draw_radius(fig, building, fire)
     fig = base_map.add_public_transport(fig)
-    fig = base_map.draw_polygon(fig, float(pand_id), fire)
-    fig, stations = base_map.draw_blocked_ov(fig, building, fire)
-    fig, roads = base_map.draw_blocked_roads(fig, building, fire)
+    fig = buildings.draw_polygon(fig, float(pand_id), fire)
+
+    fig, stations = blocked_routes.draw_blocked_ov(fig, building, fire)
+    fig, roads    = blocked_routes.draw_blocked_roads(fig, building, fire)
 
     # remove logo and toolbar
-    fig.toolbar.logo = None
+    fig.toolbar.logo     = None
     fig.toolbar_location = None
 
     # grab the static resources
-    js_resources = INLINE.render_js()
+    js_resources  = INLINE.render_js()
     css_resources = INLINE.render_css()
 
     # render template
     script, div = components(fig)
 
     # get information to show on html
-    building_functions, neighbor_functions, radius_info, amount_neighbors, amount_radius, complete_adress = base_map.get_info(pand_id, fire)
+    building_functions, neighbor_functions, radius_info, amount_neighbors, amount_radius, complete_adress = buildings.get_info(pand_id, fire)
 
     link_small = ("/building/" + pand_id + "/small")
     link_big = ("/building/" + pand_id + "/big")
@@ -102,17 +104,17 @@ def get_information(pand_id, fire):
         small_active = "active"
         big_active = str()
         # score
-        risk_score_default = round(building.norm_score_small_default.values[0], 2)
+        risk_score_default     = round(building.norm_score_small_default.values[0], 2)
         risk_score_residential = round(building.norm_score_small_residential.values[0], 2)
-        risk_score_road = round(building.norm_score_small_road.values[0], 2)
+        risk_score_road        = round(building.norm_score_small_road.values[0], 2)
     else:
         # UI
-        big_active = "active"
+        big_active   = "active"
         small_active = str()
         # score
-        risk_score_default = round(building.norm_score_big_default.values[0], 2)
+        risk_score_default     = round(building.norm_score_big_default.values[0], 2)
         risk_score_residential = round(building.norm_score_big_residential.values[0], 2)
-        risk_score_road = round(building.norm_score_big_road.values[0], 2)
+        risk_score_road        = round(building.norm_score_big_road.values[0], 2)
 
     # give the full address of the building back
     building_address = building['full_adress'].values[0]
