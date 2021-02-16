@@ -1,5 +1,5 @@
 # Infrastructural effect of fires in Amsterdam
-Project created for the course Data System Project at the university of Amsterdam with an assignment from the municipality of Amsterdam.
+Prototype created in collaboration with the municipality of Amsterdam and the University of Amsterdam.
 
 ## Setting up the prototype locally
 Create a new environment:
